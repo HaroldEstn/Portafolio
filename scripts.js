@@ -30,7 +30,8 @@ function renderBadges(badges) {
 
   sorted.forEach(badge => {
     const name     = badge.badge_template?.name || 'Certification';
-    const imageUrl = badge.badge_template?.image_url || '';
+    const rawUrl   = badge.badge_template?.image_url || '';
+    const imageUrl = rawUrl.startsWith('https://') ? rawUrl : '';
     const id       = badge.id;
     const link     = `https://www.credly.com/badges/${id}`;
     const key      = issuerKey(badge);
@@ -65,6 +66,8 @@ async function loadCertifications() {
     const data   = await res.json();
     const parsed = JSON.parse(data.contents);
     const badges = parsed.data || parsed;
+
+    if (!Array.isArray(badges)) throw new Error('Unexpected response format');
 
     statusEl.style.display = 'none';
     renderBadges(badges);
