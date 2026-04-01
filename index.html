@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>HaroldEstn</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; img-src 'self' https:; font-src https://cdn.jsdelivr.net; connect-src https://api.allorigins.win; base-uri 'self'; form-action 'none';">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -14,18 +15,21 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-          <a class="nav-link" href="#">Projects</a>
+          <a class="nav-link" href="#projects">Projects</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">About Me</a>
+          <a class="nav-link" href="#certifications">Certifications</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
+          <a class="nav-link" href="#about">About Me</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#contact">Contact</a>
         </li>
       </ul>
       <div class="nav-item ml-auto">
-          <a href="https://www.linkedin.com/in/haroldestn" target="_blank"><i class="bi bi-linkedin"></i></a>
-          <a href="https://github.com/HaroldEstn/" target="_blank"><i class="bi bi-github"></i></a>
+          <a href="https://www.linkedin.com/in/haroldestn" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin"></i></a>
+          <a href="https://github.com/HaroldEstn/" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i></a>
       </div>
     </div>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +44,7 @@
   </section>
   <section id="projects" class="projects">
       <h2>Projects</h2>
+      <div class="projects-grid">
       <div class="project-item">
           <h3>2 Delivery</h3>
           <p>Led the deployment and management of AWS infrastructure for 2Delivery, a route optimization platform. Developed core RESTful APIs, including the route assignment engine, and collaborated closely with other developers to ensure seamless integration between the backend, frontend, and mobile applications.</p>
@@ -88,7 +93,6 @@
               <span>Git</span>
           </div>
       </div>
-      </div>
       <div class="project-item">
           <h3>Match cards</h3>
           <p>Developed a memory matching game as my first personal project. Implemented features such as a timer, move counter, and a user-friendly interface.</p>
@@ -97,6 +101,14 @@
               <span>Git</span>
           </div>
       </div>
+      </div>
+  </section>
+  <section id="certifications" class="certifications">
+      <h2>Certifications</h2>
+      <div id="cert-status" class="cert-status">
+        <div class="cert-spinner" role="status" aria-label="Loading certifications"></div>
+      </div>
+      <div id="cert-grid" class="cert-grid"></div>
   </section>
   <section id="about" class="about">
       <h2>About Me</h2>
@@ -111,9 +123,10 @@
   </section>
   <section id="contact" class="contact">
       <h2>Contact</h2>
-          <a href="https://www.linkedin.com/in/haroldestn" target="_blank">linkedin <i class="bi bi-linkedin"></i></a>
+          <a href="https://www.linkedin.com/in/haroldestn" target="_blank" rel="noopener noreferrer">linkedin <i class="bi bi-linkedin"></i></a>
       <!-- <p>email: ***</p> -->
   </section>
+  <script src="scripts.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
