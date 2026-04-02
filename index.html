@@ -2,133 +2,307 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>HaroldEstn</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; img-src 'self' https:; font-src https://cdn.jsdelivr.net; connect-src https://api.allorigins.win; base-uri 'self'; form-action 'none';">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harold Gamboa · DevOps | Cloud | Backend Engineer</title>
+  <meta name="description" content="Systems Engineer with 4 years of experience in AWS architecture, serverless development, and DevOps automation.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' https:; font-src https://cdn.jsdelivr.net https://fonts.gstatic.com; connect-src 'self'; base-uri 'self'; form-action 'none';">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="#"><h1>HaroldEstn</h1></a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="#projects">Projects</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#certifications">Certifications</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#about">About Me</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#contact">Contact</a>
-        </li>
-      </ul>
-      <div class="nav-item ml-auto">
-          <a href="https://www.linkedin.com/in/haroldestn" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin"></i></a>
-          <a href="https://github.com/HaroldEstn/" target="_blank" rel="noopener noreferrer"><i class="bi bi-github"></i></a>
-      </div>
-    </div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand brand" href="#">HaroldEstn</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item"><a class="nav-link" href="#experience" data-i18n="nav.experience">Experience</a></li>
+        <li class="nav-item"><a class="nav-link" href="#projects" data-i18n="nav.projects">Projects</a></li>
+        <li class="nav-item"><a class="nav-link" href="#certifications" data-i18n="nav.certifications">Certifications</a></li>
+        <li class="nav-item"><a class="nav-link" href="#skills" data-i18n="nav.skills">Skills</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about" data-i18n="nav.about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div class="nav-socials ml-lg-3">
+        <a href="https://www.linkedin.com/in/haroldestn" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <i class="bi bi-linkedin"></i>
+        </a>
+        <a href="https://github.com/HaroldEstn/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <i class="bi bi-github"></i>
+        </a>
+      </div>
+      <div class="lang-switcher ml-lg-3">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="es">ES</button>
+      </div>
+    </div>
   </nav>
-  <section class="hero">
-      <div>
-          <h1>Welcome to my backend universe!</h1>
-          <p>Dive into the world of custom AWS solutions.</p>
-      </div>
-  </section>
-  <section id="projects" class="projects">
-      <h2>Projects</h2>
-      <div class="projects-grid">
-      <div class="project-item">
-          <h3>2 Delivery</h3>
-          <p>Led the deployment and management of AWS infrastructure for 2Delivery, a route optimization platform. Developed core RESTful APIs, including the route assignment engine, and collaborated closely with other developers to ensure seamless integration between the backend, frontend, and mobile applications.</p>
-          <div class="skills">
-              <span>Python</span>
-              <span>Team work</span>
-              <span>Flask</span>
-              <span>MySQL</span>
-              <span>AWS</span>
-              <span>HERE Technologies</span>
-              <span>API</span>
-              <span>Docker</span>
-              <span>CI/CD</span>
-              <span>Git</span>
-              <span>AWS Lambda</span>
-              <span>AWS CodePipeline</span>
-              <span>Linux</span>
-              <span>DevOps</span>
-          </div>
-      </div>
-      <div class="project-item">
-          <h3>Geofy</h3>
-          <p>Developed the cloud infrastructure and RESTful APIs for Geofy, a geocoding platform. Utilized Here Technologies to obtain accurate geographic data and build a robust system for geocoding addresses and coordinates. Worked closely with other developers to ensure seamless integration between the backend and frontend.</p>
-          <div class="skills">
-              <span>Python</span>
-              <span>Team work</span>
-              <span>FastAPI</span>
-              <span>MySQL</span>
-              <span>AWS</span>
-              <span>HERE Technologies</span>
-              <span>API</span>
-              <span>Docker</span>
-              <span>CI/CD</span>
-              <span>Git</span>
-              <span>AWS Lambda</span>
-              <span>AWS CodePipeline</span>
-              <span>Linux</span>
-              <span>DevOps</span>
-          </div>
-      </div>
-      <div class="project-item">
-          <h3>Hanoi</h3>
-          <p>Implemented a text-based version of the classic Tower of Hanoi puzzle. Utilized algorithms to solve the puzzle efficiently and provide a challenging gameplay experience.</p>
-          <div class="skills">
-              <span>C++</span>
-              <span>Git</span>
-          </div>
-      </div>
-      <div class="project-item">
-          <h3>Match cards</h3>
-          <p>Developed a memory matching game as my first personal project. Implemented features such as a timer, move counter, and a user-friendly interface.</p>
-          <div class="skills">
-              <span>Python</span>
-              <span>Git</span>
-          </div>
-      </div>
-      </div>
-  </section>
-  <section id="certifications" class="certifications">
-      <h2>Certifications</h2>
-      <div id="cert-status" class="cert-status">
-        <div class="cert-spinner" role="status" aria-label="Loading certifications"></div>
-      </div>
-      <div id="cert-grid" class="cert-grid"></div>
-  </section>
-  <section id="about" class="about">
-      <h2>About Me</h2>
-      <p>
-        Backend Developer with 3 years of experience building scalable and robust cloud-based solutions on AWS. Passionate about optimizing processes and crafting efficient backend architectures using Python, Flask, and FastAPI. Proficient in implementing AWS services like Lambda, DynamoDB, and API Gateway, and hold certifications as an AWS Developer Associate and SysOps Administrator Associate.
-      </p>
-      <br>
-      <p>
-        My projects have involved developing RESTful APIs and implementing CI/CD pipelines to automate the build, test, and deployment of code, contributing to the continuous delivery of high-quality software. I've also gained experience in configuring AWS environments for development and production, ensuring seamless deployment and scalability.
-      </p>
 
-  </section>
-  <section id="contact" class="contact">
-      <h2>Contact</h2>
-          <a href="https://www.linkedin.com/in/haroldestn" target="_blank" rel="noopener noreferrer">linkedin <i class="bi bi-linkedin"></i></a>
-      <!-- <p>email: ***</p> -->
-  </section>
-  <script src="scripts.js"></script>
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__inner">
+        <span class="hero__tag" data-i18n="hero.tag">DevOps · Cloud · Backend · AWS</span>
+        <h1 class="hero__title">
+          <span data-i18n="hero.title1">Building scalable</span><br>
+          <span class="hero__accent" data-i18n="hero.title2">cloud infrastructure</span>
+        </h1>
+        <p class="hero__sub" data-i18n="hero.sub">Systems Engineer with 4 years of experience in AWS architecture, serverless development, and DevOps automation.</p>
+        <div class="hero__cta">
+          <a href="#experience" class="btn-primary-custom" data-i18n="hero.cta1">View Experience</a>
+          <a href="#contact" class="btn-ghost-custom" data-i18n="hero.cta2">Get in Touch</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" class="section experience">
+      <div class="section__inner">
+        <h2 class="section__title" data-i18n="exp.title">Experience</h2>
+        <div class="exp-card">
+          <div class="exp-card__header">
+            <div>
+              <h3 class="exp-card__role" data-i18n="exp.role">Cloud and Development Engineer</h3>
+              <p class="exp-card__company">CNID</p>
+            </div>
+            <span class="exp-card__date" data-i18n="exp.date">March 2022 – Present</span>
+          </div>
+
+          <div class="exp-stats">
+            <div class="exp-stat">
+              <span class="exp-stat__num">100+</span>
+              <span class="exp-stat__label" data-i18n="exp.stat1">CloudFormation Templates</span>
+            </div>
+            <div class="exp-stat">
+              <span class="exp-stat__num">10+</span>
+              <span class="exp-stat__label" data-i18n="exp.stat2">CI/CD Pipelines</span>
+            </div>
+            <div class="exp-stat">
+              <span class="exp-stat__num">50+</span>
+              <span class="exp-stat__label" data-i18n="exp.stat3">Docker Images</span>
+            </div>
+            <div class="exp-stat">
+              <span class="exp-stat__num" data-i18n="exp.stat4.num">Multiple</span>
+              <span class="exp-stat__label" data-i18n="exp.stat4">AWS Accounts Managed</span>
+            </div>
+          </div>
+
+          <ul class="exp-card__list">
+            <li data-i18n-html="exp.li1">Core developer of <strong>Geofy</strong> (geolocation platform) and <strong>2Delivery</strong> (route optimization platform) — 3+ years in production with HERE Technologies APIs.</li>
+            <li data-i18n-html="exp.li2">IaC with <strong>CloudFormation</strong> (100+ templates), <strong>AWS SAM</strong>, and <strong>AWS CDK with Python</strong> (VPC, S3, CloudFront, Lambda).</li>
+            <li data-i18n-html="exp.li3">CI/CD automation with <strong>CodePipeline, CodeBuild, CodeDeploy</strong>. Deployment strategies: Blue/Green, Canary, Linear. GitHub Actions workflows (QA, Staging, Production) and GitLab CI.</li>
+            <li data-i18n-html="exp.li4">EC2 with autoscaling, <strong>ECS/Fargate</strong> with multiple services, ELB/ALB load balancers. Serverless microservices with Lambda and EventBridge.</li>
+            <li data-i18n-html="exp.li5">Security and governance: <strong>IAM</strong> policies and roles from scratch, IAM Identity Center, AWS Organizations with <strong>SCPs across multiple accounts</strong>, OIDC with AWS for GitHub Actions.</li>
+            <li data-i18n-html="exp.li6">Secrets management with <strong>Secrets Manager</strong> and Parameter Store. Cognito User Pools configuration for authentication across multiple projects.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section projects">
+      <div class="section__inner">
+        <h2 class="section__title" data-i18n="projects.title">Projects</h2>
+        <div class="projects-grid">
+
+          <div class="project-item">
+            <h3>2 Delivery</h3>
+            <p data-i18n="proj.delivery.desc">Route optimization platform that assigns orders to users based on weight, distance, and availability. Advanced integration with HERE Tourplanning API and Waypoints Sequence for optimized route planning. Led AWS infrastructure deployment and developed the core routing assignment engine API.</p>
+            <div class="skills">
+              <span>Python</span><span>Flask</span><span>AWS Lambda</span><span>HERE Technologies</span>
+              <span>CloudFormation</span><span>ECS/Fargate</span><span>Docker</span>
+              <span>CodePipeline</span><span>MySQL</span><span>API Gateway</span>
+            </div>
+          </div>
+
+          <div class="project-item">
+            <h3>Geofy</h3>
+            <p data-i18n="proj.geofy.desc">Geolocation platform that converts XLSX files with coordinates into addresses and vice versa. Integration with HERE Batch API for automated cloud processing. Responsible for cloud infrastructure design and RESTful API development.</p>
+            <div class="skills">
+              <span>Python</span><span>FastAPI</span><span>AWS Lambda</span><span>HERE Technologies</span>
+              <span>CloudFormation</span><span>Boto3</span><span>Docker</span>
+              <span>CodePipeline</span><span>MySQL</span><span>S3</span>
+            </div>
+          </div>
+
+          <div class="project-item">
+            <h3>Hanoi</h3>
+            <p data-i18n="proj.hanoi.desc">Text-based implementation of the classic Tower of Hanoi puzzle. Algorithm design for efficient puzzle solving with configurable difficulty levels.</p>
+            <div class="skills">
+              <span>C++</span><span>Algorithms</span><span>Git</span>
+            </div>
+          </div>
+
+          <div class="project-item">
+            <h3>Match Cards</h3>
+            <p data-i18n="proj.cards.desc">Memory matching game built as a first personal project. Features a timer, move counter, and score tracking with a clean user interface.</p>
+            <div class="skills">
+              <span>Python</span><span>Git</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CERTIFICATIONS -->
+    <section id="certifications" class="section certifications">
+      <div class="section__inner">
+        <h2 class="section__title" data-i18n="cert.title">Certifications</h2>
+        <div id="cert-status" class="cert-status">
+          <div class="cert-spinner" role="status" aria-label="Loading certifications"></div>
+        </div>
+        <div id="cert-grid" class="cert-grid"></div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="section skills-section">
+      <div class="section__inner">
+        <h2 class="section__title" data-i18n="skills.title">Technical Skills</h2>
+        <div class="skills-grid">
+
+          <div class="skill-cat">
+            <div class="skill-cat__header">
+              <i class="bi bi-cloud-fill"></i>
+              <h3 data-i18n="skill.cloud">Cloud · AWS</h3>
+            </div>
+            <div class="skills">
+              <span>Lambda</span><span>EC2</span><span>ECS/Fargate</span><span>EKS</span>
+              <span>S3</span><span>RDS</span><span>DynamoDB</span><span>CloudFront</span>
+              <span>API Gateway</span><span>VPC</span><span>EventBridge</span>
+              <span>CloudWatch</span><span>Cognito</span>
+            </div>
+          </div>
+
+          <div class="skill-cat">
+            <div class="skill-cat__header">
+              <i class="bi bi-gear-fill"></i>
+              <h3 data-i18n="skill.devops">IaC & DevOps</h3>
+            </div>
+            <div class="skills">
+              <span>CloudFormation</span><span>AWS SAM</span><span>AWS CDK</span>
+              <span>Terraform</span><span>CodePipeline</span><span>CodeBuild</span>
+              <span>CodeDeploy</span><span>GitHub Actions</span><span>GitLab CI</span>
+              <span>Blue/Green</span><span>Canary</span>
+            </div>
+          </div>
+
+          <div class="skill-cat">
+            <div class="skill-cat__header">
+              <i class="bi bi-shield-fill-check"></i>
+              <h3 data-i18n="skill.security">Security & Governance</h3>
+            </div>
+            <div class="skills">
+              <span>IAM</span><span>IAM Identity Center</span><span>AWS Organizations</span>
+              <span>SCPs</span><span>Control Tower</span><span>Secrets Manager</span>
+              <span>Parameter Store</span><span>OIDC</span><span>Boundary Policies</span>
+            </div>
+          </div>
+
+          <div class="skill-cat">
+            <div class="skill-cat__header">
+              <i class="bi bi-code-slash"></i>
+              <h3 data-i18n="skill.backend">Backend</h3>
+            </div>
+            <div class="skills">
+              <span>Python</span><span>Flask</span><span>FastAPI</span>
+              <span>Boto3</span><span>SQLAlchemy</span><span>Bash</span>
+              <span>SQL</span><span>REST APIs</span>
+            </div>
+          </div>
+
+          <div class="skill-cat">
+            <div class="skill-cat__header">
+              <i class="bi bi-database-fill"></i>
+              <h3 data-i18n="skill.db">Databases</h3>
+            </div>
+            <div class="skills">
+              <span>MySQL</span><span>PostgreSQL</span><span>DynamoDB</span>
+              <span>RDS</span><span>SQLAlchemy</span>
+            </div>
+          </div>
+
+          <div class="skill-cat">
+            <div class="skill-cat__header">
+              <i class="bi bi-box-seam-fill"></i>
+              <h3 data-i18n="skill.containers">Containers & OS</h3>
+            </div>
+            <div class="skills">
+              <span>Docker</span><span>ECR</span><span>Docker Compose</span>
+              <span>Ubuntu</span><span>Amazon Linux</span><span>Arch Linux</span>
+              <span>systemd</span><span>Git</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section about">
+      <div class="section__inner">
+        <h2 class="section__title" data-i18n="about.title">About Me</h2>
+        <div class="about__content">
+          <p data-i18n="about.p1">Systems Engineer with 4 years of experience in backend development, cloud architecture (AWS), and DevOps practices. Specialist in serverless Lambda functions, Infrastructure as Code (CloudFormation, SAM, CDK), and external API integrations. I have led the implementation of geolocation and route planning solutions in production environments, with emphasis on infrastructure automation, advanced CI/CD, and cloud governance.</p>
+          <p data-i18n="about.p2">Proactive, adaptable, and highly motivated self-learner. I enjoy technical challenges and am always looking for innovative solutions. I work responsibly, communicate effectively, and collaborate well within multidisciplinary teams. Experience in technical support and customer training.</p>
+          <div class="about__education">
+            <i class="bi bi-mortarboard-fill"></i>
+            <div>
+              <strong data-i18n="about.edu.degree">B.Sc. in Systems Engineering</strong>
+              <span data-i18n="about.edu.school">Corporación Universitaria Minuto de Dios · 2017 – 2022</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section contact">
+      <div class="section__inner contact__inner">
+        <h2 class="section__title" data-i18n="contact.title">Let's Connect</h2>
+        <p class="contact__sub" data-i18n="contact.sub">Open to new opportunities and collaborations.</p>
+        <div class="contact__links">
+          <!-- Email: assembled by JS — not exposed in HTML source -->
+          <a href="#" class="contact__link contact__link--email"
+             data-u="haroldestn" data-d="gmail" data-t="com"
+             id="contactEmail">
+            <i class="bi bi-envelope-fill"></i>
+            <span data-i18n="contact.email">Email</span>
+          </a>
+          <!-- WhatsApp: number assembled by JS — not exposed in HTML source -->
+          <a href="#" class="contact__link contact__link--wa"
+             data-cc="57" data-n="3044775082"
+             id="contactWa" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-whatsapp"></i>
+            <span>WhatsApp</span>
+          </a>
+          <a href="https://www.linkedin.com/in/haroldestn" target="_blank" rel="noopener noreferrer" class="contact__link contact__link--li">
+            <i class="bi bi-linkedin"></i>
+            <span>LinkedIn</span>
+          </a>
+          <a href="https://github.com/HaroldEstn/" target="_blank" rel="noopener noreferrer" class="contact__link contact__link--gh">
+            <i class="bi bi-github"></i>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="i18n.js"></script>
+  <script src="scripts.js"></script>
 </body>
 </html>
