@@ -8,9 +8,11 @@
 //         emits stage:change {id}.
 
 import createCosts from './scenes/costs.js';
+import createPipeline from './scenes/pipeline.js';
 
 const FACTORIES = {
   costs: createCosts,
+  cicd: createPipeline,
 };
 
 // Which scene handles which keyboard action.
