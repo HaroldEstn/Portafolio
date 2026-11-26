@@ -621,6 +621,12 @@ kbd {
 .help__list dd { color: var(--muted); font-size: 0.9rem; margin: 0; }
 .help__note { margin-top: 14px; color: var(--muted); font-size: 0.82rem; }
 
+@media (max-height: 640px) {
+  .help__panel { padding: 14px 18px; }
+  .help__list > div { padding: 3px 0; }
+  .help__note { margin-top: 8px; }
+}
+
 /* ---- Stage chrome and shared scene pieces ------------------------------ */
 .stage__bar {
   display: flex;

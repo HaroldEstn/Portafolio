@@ -31,20 +31,33 @@ export function initKeys() {
     langEl.textContent = getLang().toUpperCase();
   }
 
-  if ('IntersectionObserver' in window) {
-    // A section is "current" while it crosses a thin band near the top third.
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          currentSection = entry.target.id;
-          renderStatus();
-        });
-      },
-      { rootMargin: '-35% 0px -60% 0px' },
-    );
-    sections.forEach((s) => io.observe(s));
+  // The current section follows the real scroll position: the last section
+  // whose top is above 35% of the viewport; the last one at the page bottom.
+  let ticking = false;
+  function syncSection() {
+    ticking = false;
+    const doc = document.documentElement;
+    const atBottom = window.scrollY + window.innerHeight >= doc.scrollHeight - 2;
+    let id = sections[0]?.id;
+    if (atBottom) id = sections[sections.length - 1]?.id;
+    else {
+      const line = window.innerHeight * 0.35;
+      for (const s of sections) if (s.getBoundingClientRect().top <= line) id = s.id;
+    }
+    if (id && id !== currentSection) {
+      currentSection = id;
+      renderStatus();
+    }
   }
+  const queueSync = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(syncSection);
+    }
+  };
+  window.addEventListener('scroll', queueSync, { passive: true });
+  window.addEventListener('resize', queueSync);
+  syncSection();
 
   document.addEventListener('stage:change', (e) => {
     currentScene = e.detail.id;
@@ -61,6 +74,12 @@ export function initKeys() {
   }
 
   const stepSection = (delta) => goToSection(sections.findIndex((s) => s.id === currentSection) + delta);
+  // Small steps: smooth on the first press, instant on key repeat so a held key
+  // scrolls continuously without queuing smooth animations. 'instant' (not
+  // 'auto') because the stylesheet sets scroll-behavior: smooth on <html>.
+  const lineStep = () => Math.max(60, Math.round(window.innerHeight * 0.15));
+  const scrollByStep = (dy, repeat) =>
+    window.scrollBy({ top: dy, behavior: repeat || prefersReducedMotion() ? 'instant' : 'smooth' });
   const scrollTop = () => window.scrollTo({ top: 0, behavior: behavior() });
   const scrollBottom = () =>
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: behavior() });
@@ -87,7 +106,11 @@ export function initKeys() {
   const isInteractive = (el) => !!el?.closest?.('button, a[href], [role="tab"], summary');
 
   document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+    // AltGr reports altKey (and ctrlKey on some platforms) while still producing
+    // a printable character such as { or }; let those through.
+    const altGr = e.getModifierState?.('AltGraph');
+    if (e.metaKey || e.defaultPrevented) return;
+    if ((e.ctrlKey || e.altKey) && !altGr) return;
     if (isTyping(e.target)) return;
 
     if (e.key === 'Escape') {
@@ -120,8 +143,12 @@ export function initKeys() {
     lastG = 0;
 
     switch (e.key) {
-      case 'j': stepSection(1); break;
-      case 'k': stepSection(-1); break;
+      case 'j': e.preventDefault(); scrollByStep(lineStep(), e.repeat); break;
+      case 'k': e.preventDefault(); scrollByStep(-lineStep(), e.repeat); break;
+      case 'd': e.preventDefault(); scrollByStep(window.innerHeight / 2, e.repeat); break;
+      case 'u': e.preventDefault(); scrollByStep(-window.innerHeight / 2, e.repeat); break;
+      case '}': stepSection(1); break;
+      case '{': stepSection(-1); break;
       case 'G': scrollBottom(); break;
       case 'h': emit('stage:select', { delta: -1 }); break;
       case 'l': emit('stage:select', { delta: 1 }); break;
