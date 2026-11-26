@@ -288,6 +288,37 @@
 
   </main>
 
+  <!-- Statusline (lualine-style) -->
+  <div class="statusline" id="statusline">
+    <span class="statusline__mode" id="sl-mode">NORMAL</span>
+    <span class="statusline__seg" id="sl-section"></span>
+    <span class="statusline__seg statusline__seg--scene" id="sl-scene"></span>
+    <span class="statusline__spacer"></span>
+    <button type="button" class="statusline__help" id="sl-help" aria-haspopup="dialog"><kbd>?</kbd> <span data-i18n="status.hint">for keys</span></button>
+    <span class="statusline__seg statusline__lang" id="sl-lang">EN</span>
+  </div>
+
+  <!-- Keyboard help overlay -->
+  <div class="help" id="help" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="help__panel">
+      <div class="help__head">
+        <h2 id="help-title" data-i18n="help.title">Keyboard shortcuts</h2>
+        <button type="button" class="help__close" data-i18n-aria="help.close" aria-label="Close"><span aria-hidden="true">Esc</span></button>
+      </div>
+      <dl class="help__list">
+        <div><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd data-i18n="help.sections">Next / previous section</dd></div>
+        <div><dt><kbd>h</kbd> <kbd>l</kbd></dt><dd data-i18n="help.scenes">Previous / next scene</dd></div>
+        <div><dt><kbd>1</kbd>–<kbd>5</kbd></dt><dd data-i18n="help.jump">Jump to scene</dd></div>
+        <div><dt><kbd>Space</kbd> <kbd>Enter</kbd></dt><dd data-i18n="help.replay">Replay the current scene</dd></div>
+        <div><dt><kbd>r</kbd></dt><dd data-i18n="help.fail">Inject a failure (CI/CD scene)</dd></div>
+        <div><dt><kbd>g</kbd><kbd>g</kbd> <kbd>G</kbd></dt><dd data-i18n="help.topbottom">Top / bottom of the page</dd></div>
+        <div><dt><kbd>t</kbd></dt><dd data-i18n="help.lang">Toggle English / Spanish</dd></div>
+        <div><dt><kbd>?</kbd> <kbd>Esc</kbd></dt><dd data-i18n="help.help">Open / close this help</dd></div>
+      </dl>
+      <p class="help__note" data-i18n="help.note">Shortcuts are optional: everything also works with mouse and touch.</p>
+    </div>
+  </div>
+
   <footer class="footer">
     <p data-i18n="footer.note">Built with vanilla HTML, CSS and JavaScript. No frameworks.</p>
   </footer>

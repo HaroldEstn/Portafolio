@@ -5,8 +5,10 @@ import { initI18n } from './i18n.js';
 import { assembleContact } from './contact.js';
 import { loadCertifications } from './certs.js';
 import { initCounters } from './counters.js';
+import { initKeys } from './keys.js';
 
 initI18n();
 assembleContact();
 initCounters();
 loadCertifications();
+initKeys();

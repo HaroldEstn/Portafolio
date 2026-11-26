@@ -26,7 +26,7 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 
 ## Tasks
 - [x] T1 Skeleton: new `index.html`/`styles.css`, remove CDN deps, CSP, move certs/contact/i18n to `js/`, new content. Route: delegated (writer trigger, 2+ non-trivial files).
-- [ ] T2 Keyboard (`js/keys.js`): j/k, h/l, 1-5, Space/Enter, r, gg/G, t, ?/Esc; statusline; help overlay. Route: delegated.
+- [x] T2 Keyboard (`js/keys.js`): j/k, h/l, 1-5, Space/Enter, r, gg/G, t, ?/Esc; statusline; help overlay. Route: delegated.
 - [ ] T3 Stage controller (`js/stage.js`) + Costs scene. Route: delegated.
 - [ ] T4 CI/CD scene with canary + rollback interaction. Route: delegated.
 - [ ] T5 IaC, GenAI agent, AI tooling scenes. Route: delegated.
@@ -41,7 +41,8 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 
 ## Progress / Evidence
 - T1 commit "feat: rebuild skeleton with vanilla ES modules, tighter CSP and new content" (SHA not self-referable; see git log). Checks: node --check js/*.js ok; headless CDP smoke test at 1280px and 375px: 17 cert cards rendered, no horizontal overflow, no CSP/JS errors, EN/ES toggle updates title, email assembled by JS. Note: badges.json has 17 badges while profile/hero says 14 certifications (unchanged).
-(T2-T4 entries below)
+- T2 commit "feat: add vim-style keyboard navigation, statusline and help overlay". Checks: node --check js/*.js ok; headless CDP key test: j/k/G/gg (500ms buffer)/t/?/Esc, Space/Enter suppressed on buttons/tabs, Ctrl ignored, statusline updates by section and language, stage events emitted (h/l/1-5/Space/Enter/r) for stage.js (T3) to consume; no console errors.
+(T3-T4 entries below)
 
 ## Next step
 T1–T4 (first deliverable).
