@@ -100,6 +100,36 @@ export function initKeys() {
     renderStatus();
   }
 
+  // Focus trap: Tab and Shift+Tab cycle through the dialog's focusable controls.
+  const focusables = () =>
+    [...help.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')].filter(
+      (el) => !el.disabled && !el.hidden,
+    );
+  function trapTab(e) {
+    const items = focusables();
+    if (!items.length) {
+      e.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (!help.contains(active)) {
+      e.preventDefault();
+      first.focus();
+    } else if (e.shiftKey && active === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+  // Keep focus inside the dialog if something else grabs it while open.
+  document.addEventListener('focusin', (e) => {
+    if (!help.hidden && !help.contains(e.target)) focusables()[0]?.focus();
+  });
+
   /* ---- Key handling ---------------------------------------------------- */
   const isTyping = (el) =>
     !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
@@ -110,6 +140,10 @@ export function initKeys() {
     // a printable character such as { or }; let those through.
     const altGr = e.getModifierState?.('AltGraph');
     if (e.metaKey || e.defaultPrevented) return;
+    if (e.key === 'Tab' && !help.hidden) {
+      trapTab(e);
+      return;
+    }
     if ((e.ctrlKey || e.altKey) && !altGr) return;
     if (isTyping(e.target)) return;
 
@@ -159,7 +193,9 @@ export function initKeys() {
       }
       case ' ':
       case 'Enter':
-        if (isInteractive(e.target)) return; // let buttons and links act normally
+        // Replay only while the impact section is current; elsewhere Space keeps
+        // its native page scroll. Buttons, links and tabs act normally.
+        if (currentSection !== 'impact' || isInteractive(e.target)) return;
         e.preventDefault();
         emit('stage:replay');
         break;
