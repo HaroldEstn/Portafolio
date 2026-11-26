@@ -1,159 +1,123 @@
-// Costs scene: the voice-agent cost steps down with each optimization,
-// ending at about -80% (the only real figure; middle steps are illustrative).
+// Costs scene: a generic cost-optimization waterfall. Bars are sized from the
+// internal values below; no amounts, percentages or axis values are rendered.
 
-import { applyTranslations } from '../i18n.js';
-import { createRunner, svg, lerp, clamp, easeInOutCubic } from '../util.js';
+import { applyTranslations, onLangChange, t } from '../i18n.js';
+import { createRunner, svg, clamp, easeOutCubic } from '../util.js';
+
+// Internal values only (never shown).
+const BASELINE = 16000;
+const STEPS = [
+  { key: 'costs.step1', delta: 5000 },
+  { key: 'costs.step2', delta: 600 },
+  { key: 'costs.step3', delta: 500 },
+  { key: 'costs.step4', delta: 100 },
+];
+const FINAL = BASELINE - STEPS.reduce((sum, s) => sum + s.delta, 0);
 
 // Chart geometry (SVG user units).
-const L = 48;
-const R = 468;
-const TOP = 24;
-const BOTTOM = 232;
-const W = 480;
-const H = 276;
-const DURATION = 4600;
+const W = 360;
+const H = 236;
+const COL = W / (STEPS.length + 2);
+const BAR_W = 38;
+const TOP = 20;
+const BOTTOM = 190;
+const SCALE = (BOTTOM - TOP) / BASELINE;
+const MIN_STEP_H = 5; // keeps the thinnest steps perceptible
+const DURATION = 5200;
 
-const STEPS = [
-  { key: 'costs.step1', value: 100, tag: 'baseline', label: '100%' },
-  { key: 'costs.step2', value: 62, tag: 'illustrative', label: '~62%*' },
-  { key: 'costs.step3', value: 38, tag: 'illustrative', label: '~38%*' },
-  { key: 'costs.step4', value: 20, tag: 'real', label: '~20%' },
-];
-// Savings (100 - cost) at each step: 0, 38, 62, 80.
-const SAVINGS = STEPS.map((s) => 100 - s.value);
+// Timeline slots as fractions of DURATION: [start, length] per bar.
+const SLOTS = [[0, 0.18], [0.2, 0.14], [0.36, 0.14], [0.52, 0.14], [0.68, 0.14], [0.84, 0.16]];
 
-const yOf = (v) => BOTTOM - (v / 100) * (BOTTOM - TOP);
-const xOf = (i) => L + (i * (R - L)) / STEPS.length;
+// Bars: baseline, one per step, optimized result.
+function layout() {
+  const bars = [];
+  let cursor = BOTTOM - BASELINE * SCALE;
+  bars.push({ kind: 'base', key: 'costs.baseline', top: cursor, bottom: BOTTOM });
+  STEPS.forEach((s) => {
+    const top = cursor;
+    const bottom = top + Math.max(s.delta * SCALE, MIN_STEP_H);
+    bars.push({ kind: 'step', key: s.key, top, bottom });
+    cursor = bottom;
+  });
+  bars.push({ kind: 'final', key: 'costs.final', top: cursor, bottom: BOTTOM });
+  return bars.map((b, i) => ({ ...b, cx: COL * (i + 0.5) }));
+}
 
 const TEMPLATE = `
   <div class="costs">
     <header class="scene__head">
-      <h3 data-i18n="costs.title">Voice agent cost, step by step</h3>
-      <p data-i18n="costs.sub">Each optimization swapped an expensive component for a cheaper one.</p>
+      <h3 data-i18n="costs.title">Cost optimization across the stack</h3>
+      <p data-i18n="costs.sub">Starting from the initial cost, each optimization lowers the monthly total.</p>
     </header>
-    <div class="costs__main">
-      <div class="costs__chart-col">
-        <div class="costs__kpi">
-          <span class="costs__kpi-num" data-role="kpi">−0%</span>
-          <span class="costs__kpi-label" data-i18n="costs.kpi">Estimated voice-agent cost reduction</span>
-        </div>
-        <svg class="costs__svg" data-role="chart" viewBox="0 0 ${W} ${H}" role="img" data-i18n-aria="costs.chartAlt" aria-label="Cost chart"></svg>
-        <ol class="costs__steps" data-role="steps"></ol>
-        <p class="costs__note" data-i18n="costs.note">* Intermediate values are illustrative.</p>
-      </div>
-      <div class="costs__cards">
-        <article class="costs__card" data-role="card">
-          <h4 data-i18n="costs.card1.title">Inefficient database queries</h4>
-          <p class="costs__big"><span data-role="db-num">−USD 600</span> <span class="costs__unit" data-i18n="costs.perMonth">/ month</span></p>
-          <p data-i18n="costs.card1.desc"></p>
-        </article>
-        <article class="costs__card" data-role="card">
-          <h4 data-i18n="costs.card2.title">EC2 auto on/off schedule</h4>
-          <div class="sched" data-role="sched" aria-hidden="true"></div>
-          <p class="costs__tag" data-i18n="costs.card2.tag">illustrative schedule</p>
-          <p data-i18n="costs.card2.desc"></p>
-        </article>
-        <article class="costs__card" data-role="card">
-          <h4 data-i18n="costs.card3.title">Log retention tuning</h4>
-          <div class="retention" aria-hidden="true"><div class="retention__fill" data-role="retention"></div></div>
-          <p class="costs__tag" data-i18n="costs.tag.illustrative">illustrative</p>
-          <p data-i18n="costs.card3.desc"></p>
-        </article>
-      </div>
-    </div>
+    <svg class="costs__svg" data-role="chart" viewBox="0 0 ${W} ${H}" role="img" data-i18n-aria="costs.chartAlt" aria-label="Cost waterfall chart"></svg>
+    <p class="costs__note" data-i18n="costs.note">Illustrative view: bar heights are proportional, figures are not shown.</p>
   </div>`;
 
 export default function createCosts() {
   const run = createRunner();
   let root;
-  let clipRect;
-  let kpi;
-  let dbNum;
-  let markers = [];
-  let legend = [];
+  let unsubLang = () => {};
+  let bars = [];
+  let els = [];
+
+  function setLabel(el, key, cx) {
+    el.replaceChildren();
+    t(key).split('\n').forEach((line, i) => {
+      const span = svg('tspan', { x: cx, y: BOTTOM + 16 + i * 13 });
+      span.textContent = line;
+      el.appendChild(span);
+    });
+  }
+
+  function relabel() {
+    els.forEach((e, i) => setLabel(e.label, bars[i].key, bars[i].cx));
+  }
 
   function build() {
     const chart = root.querySelector('[data-role="chart"]');
+    bars = layout();
 
-    const defs = svg('defs', {}, chart);
-    const clip = svg('clipPath', { id: 'costs-reveal' }, defs);
-    clipRect = svg('rect', { x: 0, y: 0, width: 0, height: H }, clip);
+    svg('line', { x1: 0, x2: W, y1: BOTTOM + 0.5, y2: BOTTOM + 0.5, class: 'costs__axis-line' }, chart);
 
-    // Grid and y axis.
-    [0, 25, 50, 75, 100].forEach((v) => {
-      svg('line', { x1: L, x2: R, y1: yOf(v), y2: yOf(v), class: 'costs__grid' }, chart);
-      const label = svg('text', { x: L - 8, y: yOf(v) + 4, class: 'costs__axis', 'text-anchor': 'end' }, chart);
-      label.textContent = `${v}%`;
+    // Connectors first so bars paint over their ends.
+    const connectors = bars.slice(1).map((b, i) => {
+      const prev = bars[i];
+      const y = b.kind === 'final' ? b.top : prev.bottom;
+      return svg('line', {
+        x1: prev.cx + BAR_W / 2, x2: b.cx - BAR_W / 2, y1: y, y2: y, class: 'costs__link',
+      }, chart);
     });
 
-    // Baseline (initial cost).
-    svg('line', { x1: L, x2: R, y1: yOf(100), y2: yOf(100), class: 'costs__baseline' }, chart);
-    const baseLabel = svg('text', { x: R, y: yOf(100) - 6, class: 'costs__axis costs__axis--base', 'text-anchor': 'end' }, chart);
-    baseLabel.dataset.i18n = 'costs.baseline';
-
-    // Stepped line and the savings area between baseline and line.
-    const pts = [];
-    STEPS.forEach((s, i) => {
-      pts.push([xOf(i), yOf(s.value)], [xOf(i + 1), yOf(s.value)]);
+    els = bars.map((b, i) => {
+      const g = svg('g', { class: `costs__bar costs__bar--${b.kind}` }, chart);
+      const halo = svg('rect', {
+        x: b.cx - BAR_W / 2 - 4, width: BAR_W + 8, rx: 4, class: 'costs__halo',
+        y: b.top - 4, height: b.bottom - b.top + 8,
+      }, g);
+      const rect = svg('rect', { x: b.cx - BAR_W / 2, width: BAR_W, rx: 3, class: 'costs__rect', y: b.top, height: 0 }, g);
+      const label = svg('text', { class: 'costs__label', 'text-anchor': 'middle' }, g);
+      return { g, halo, rect, label, link: connectors[i - 1] ?? null };
     });
-    const linePath = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ');
-    const area = [[L, yOf(100)], [R, yOf(100)], ...[...pts].reverse()];
-
-    const clipped = svg('g', { 'clip-path': 'url(#costs-reveal)' }, chart);
-    svg('polygon', { points: area.map((p) => p.join(',')).join(' '), class: 'costs__saving' }, clipped);
-    svg('path', { d: linePath, class: 'costs__line', fill: 'none' }, clipped);
-
-    // Numbered markers on each plateau.
-    markers = STEPS.map((s, i) => {
-      const cx = (xOf(i) + xOf(i + 1)) / 2;
-      const cy = yOf(s.value);
-      const g = svg('g', { class: `costs__marker costs__marker--${s.tag}` }, chart);
-      svg('circle', { cx, cy, r: 11 }, g);
-      const n = svg('text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'costs__marker-n' }, g);
-      n.textContent = String(i + 1);
-      const v = svg('text', { x: cx, y: cy + 32, 'text-anchor': 'middle', class: 'costs__marker-v' }, g);
-      v.textContent = s.label;
-      return g;
-    });
-
-    // Legend, numbered like the markers.
-    const list = root.querySelector('[data-role="steps"]');
-    legend = STEPS.map((s, i) => {
-      const li = document.createElement('li');
-      li.className = 'costs__step';
-      li.innerHTML = `<span class="costs__step-n">${i + 1}</span><span class="costs__step-label" data-i18n="${s.key}"></span><span class="tag tag--${s.tag}" data-i18n="costs.tag.${s.tag}"></span>`;
-      list.appendChild(li);
-      return li;
-    });
-
-    // EC2 schedule: 24 hourly cells, "on" during working hours (illustrative).
-    const sched = root.querySelector('[data-role="sched"]');
-    for (let h = 0; h < 24; h += 1) {
-      const cell = document.createElement('span');
-      cell.className = h >= 8 && h < 18 ? 'sched__cell sched__cell--on' : 'sched__cell';
-      sched.appendChild(cell);
-    }
+    relabel();
   }
 
   function setProgress(p) {
-    const f = p * STEPS.length;
-    const index = clamp(Math.floor(f), 0, STEPS.length - 1);
-    const local = f - index;
+    els.forEach((e, i) => {
+      const b = bars[i];
+      const [start, len] = SLOTS[i];
+      const local = clamp((p - start) / len, 0, 1);
+      const grow = easeOutCubic(local);
+      const h = (b.bottom - b.top) * grow;
 
-    clipRect.setAttribute('width', p <= 0 ? 0 : String(L + p * (R - L) + (p >= 1 ? 4 : 0)));
+      // Baseline and result grow up from the axis; steps drop down from the previous level.
+      e.rect.setAttribute('y', b.kind === 'step' ? b.top : b.bottom - h);
+      e.rect.setAttribute('height', h);
+      e.label.style.opacity = clamp((local - 0.3) / 0.4, 0, 1);
+      if (e.link) e.link.style.opacity = clamp(local * 4, 0, 1);
 
-    // Savings counter eases toward the next step just before each drop.
-    let saved = SAVINGS[index];
-    if (index < STEPS.length - 1 && local > 0.8) {
-      saved = lerp(saved, SAVINGS[index + 1], easeInOutCubic((local - 0.8) / 0.2));
-    }
-    kpi.textContent = `−${Math.round(saved)}%`;
-
-    STEPS.forEach((_, i) => {
-      const reached = p > 0 && f >= i + (i ? 0.05 : 0);
-      markers[i].classList.toggle('is-on', reached);
-      legend[i].classList.toggle('is-on', reached);
-      legend[i].classList.toggle('is-current', reached && i === index);
+      // Pulse on each step so thin reductions stay noticeable.
+      const pulse = b.kind === 'step' && local > 0 && local < 1 ? Math.sin(local * Math.PI) : 0;
+      e.halo.style.opacity = pulse;
     });
   }
 
@@ -162,57 +126,24 @@ export default function createCosts() {
       root = el;
       el.innerHTML = TEMPLATE;
       build();
-      kpi = el.querySelector('[data-role="kpi"]');
-      dbNum = el.querySelector('[data-role="db-num"]');
       applyTranslations(el);
       setProgress(0);
+      unsubLang = onLangChange(() => relabel());
     },
 
     play() {
       this.reset();
-      run.tween(DURATION, setProgress, { ease: easeInOutCubic });
-
-      const cards = root.querySelectorAll('[data-role="card"]');
-      cards.forEach((card, i) => {
-        run.animate(
-          card,
-          [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
-          { duration: 500, delay: 700 + i * 350 },
-        );
-      });
-
-      // Count-up for the DB savings, starting with its card.
-      run.after(900, () => {
-        run.tween(1600, (p) => {
-          dbNum.textContent = `−USD ${Math.round(600 * p)}`;
-        }, { ease: (p) => 1 - Math.pow(1 - p, 3) });
-      });
-
-      // EC2 schedule: "on" hours light up one by one.
-      root.querySelectorAll('.sched__cell--on').forEach((cell, i) => {
-        run.animate(cell, [{ opacity: 0.1, transform: 'scaleY(0.2)' }, { opacity: 1, transform: 'scaleY(1)' }], {
-          duration: 300,
-          delay: 1400 + i * 60,
-        });
-      });
-
-      // Log retention bar shrinks.
-      run.animate(
-        root.querySelector('[data-role="retention"]'),
-        [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0.35)' }],
-        { duration: 1400, delay: 1750, easing: 'ease-in-out' },
-      );
+      run.tween(DURATION, setProgress);
     },
 
     reset() {
       run.cancel();
-      if (!root) return;
-      setProgress(0);
-      dbNum.textContent = '−USD 0';
+      if (root) setProgress(0);
     },
 
     destroy() {
       run.cancel();
+      unsubLang();
       root?.replaceChildren();
     },
   };
