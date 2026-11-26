@@ -27,7 +27,7 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 ## Tasks
 - [x] T1 Skeleton: new `index.html`/`styles.css`, remove CDN deps, CSP, move certs/contact/i18n to `js/`, new content. Route: delegated (writer trigger, 2+ non-trivial files).
 - [x] T2 Keyboard (`js/keys.js`): j/k, h/l, 1-5, Space/Enter, r, gg/G, t, ?/Esc; statusline; help overlay. Route: delegated.
-- [ ] T3 Stage controller (`js/stage.js`) + Costs scene. Route: delegated.
+- [x] T3 Stage controller (`js/stage.js`) + Costs scene. Route: delegated.
 - [ ] T4 CI/CD scene with canary + rollback interaction. Route: delegated.
 - [ ] T5 IaC, GenAI agent, AI tooling scenes. Route: delegated.
 - [ ] T6 Polish: reduced motion, mobile layout, README. Route: delegated.
@@ -42,7 +42,8 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 ## Progress / Evidence
 - T1 commit "feat: rebuild skeleton with vanilla ES modules, tighter CSP and new content" (SHA not self-referable; see git log). Checks: node --check js/*.js ok; headless CDP smoke test at 1280px and 375px: 17 cert cards rendered, no horizontal overflow, no CSP/JS errors, EN/ES toggle updates title, email assembled by JS. Note: badges.json has 17 badges while profile/hero says 14 certifications (unchanged).
 - T2 commit "feat: add vim-style keyboard navigation, statusline and help overlay". Checks: node --check js/*.js ok; headless CDP key test: j/k/G/gg (500ms buffer)/t/?/Esc, Space/Enter suppressed on buttons/tabs, Ctrl ignored, statusline updates by section and language, stage events emitted (h/l/1-5/Space/Enter/r) for stage.js (T3) to consume; no console errors.
-(T3-T4 entries below)
+- T3 commit "feat: add stage controller and animated costs scene". Checks: node --check on all js/ files ok; headless CDP at 1280px and 375px: scene plays on entering viewport (KPI counts to -80%, DB card to -USD 600), no horizontal overflow, h/l/1-5/Space switch and replay scenes, statusline follows scene, EN/ES re-renders labels, no console errors; screenshots reviewed.
+(T4 entry below)
 
 ## Next step
 T1–T4 (first deliverable).
