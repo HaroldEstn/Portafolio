@@ -1,5 +1,5 @@
-// CI/CD scene: a token travels Push -> Unit tests -> SonarQube -> Build & push
-// ECR -> Canary deploy -> Monitoring. Two versions serve traffic: v1 starts as
+// CI/CD scene: a token travels Push -> Unit tests -> SonarQube -> Build &
+// publish a Lambda version -> Canary deploy (CodeDeploy) -> Monitoring. Two versions serve traffic: v1 starts as
 // "Current" at 100%; when v2 arrives v1 becomes "Previous" and traffic shifts
 // gradually to v2 (particles split between both). "Inject failure" (button or
 // key r) makes the error metric spike, the alarm fire, traffic shift back to v1
