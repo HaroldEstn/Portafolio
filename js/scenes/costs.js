@@ -1,123 +1,104 @@
-// Costs scene: a generic cost-optimization waterfall. Bars are sized from the
-// internal values below; no amounts, percentages or axis values are rendered.
+// Costs scene: per-category before/after bars. Every "before" bar has the same
+// full height; each "after" bar is sized from the reduction below. The
+// reductions only drive bar heights and are never rendered as text.
 
 import { applyTranslations, onLangChange, t } from '../i18n.js';
-import { createRunner, svg, clamp, easeOutCubic } from '../util.js';
+import { createRunner, svg, clamp, lerp, easeOutCubic, easeInOutCubic } from '../util.js';
 
-// Internal values only (never shown).
-const BASELINE = 16000;
-const STEPS = [
-  { key: 'costs.step1', delta: 5000 },
-  { key: 'costs.step2', delta: 600 },
-  { key: 'costs.step3', delta: 500 },
-  { key: 'costs.step4', delta: 100 },
+// Internal values only (never shown): share removed from the "before" bar.
+const CATEGORIES = [
+  { key: 'costs.cat1', reduction: 0.8 },
+  { key: 'costs.cat2', reduction: 0.1 },
+  { key: 'costs.cat3', reduction: 0.6 },
+  { key: 'costs.cat4', reduction: 0.65 },
 ];
-const FINAL = BASELINE - STEPS.reduce((sum, s) => sum + s.delta, 0);
 
 // Chart geometry (SVG user units).
-const W = 360;
-const H = 236;
-const COL = W / (STEPS.length + 2);
-const BAR_W = 38;
-const TOP = 20;
-const BOTTOM = 190;
-const SCALE = (BOTTOM - TOP) / BASELINE;
-const MIN_STEP_H = 5; // keeps the thinnest steps perceptible
-const DURATION = 5200;
+const W = 320;
+const H = 214;
+const COL = W / CATEGORIES.length;
+const BAR_W = 28;
+const GAP = 4;
+const TOP = 12;
+const BOTTOM = 168;
+const FULL = BOTTOM - TOP;
+const DURATION = 5400;
 
-// Timeline slots as fractions of DURATION: [start, length] per bar.
-const SLOTS = [[0, 0.18], [0.2, 0.14], [0.36, 0.14], [0.52, 0.14], [0.68, 0.14], [0.84, 0.16]];
-
-// Bars: baseline, one per step, optimized result.
-function layout() {
-  const bars = [];
-  let cursor = BOTTOM - BASELINE * SCALE;
-  bars.push({ kind: 'base', key: 'costs.baseline', top: cursor, bottom: BOTTOM });
-  STEPS.forEach((s) => {
-    const top = cursor;
-    const bottom = top + Math.max(s.delta * SCALE, MIN_STEP_H);
-    bars.push({ kind: 'step', key: s.key, top, bottom });
-    cursor = bottom;
-  });
-  bars.push({ kind: 'final', key: 'costs.final', top: cursor, bottom: BOTTOM });
-  return bars.map((b, i) => ({ ...b, cx: COL * (i + 0.5) }));
-}
+// Timeline as fractions of DURATION: before bars grow together, then each
+// after bar drops in sequence.
+const GROW_LEN = 0.22;
+const GROW_STAGGER = 0.04;
+const DROP_START = 0.3;
+const DROP_STEP = 0.16;
+const DROP_LEN = 0.18;
 
 const TEMPLATE = `
   <div class="costs">
     <header class="scene__head">
       <h3 data-i18n="costs.title">Cost optimization across the stack</h3>
-      <p data-i18n="costs.sub">Starting from the initial cost, each optimization lowers the monthly total.</p>
+      <p data-i18n="costs.sub">Each category compared before and after optimization.</p>
     </header>
-    <svg class="costs__svg" data-role="chart" viewBox="0 0 ${W} ${H}" role="img" data-i18n-aria="costs.chartAlt" aria-label="Cost waterfall chart"></svg>
-    <p class="costs__note" data-i18n="costs.note">Illustrative view: bar heights are proportional, figures are not shown.</p>
+    <svg class="costs__svg" data-role="chart" viewBox="0 0 ${W} ${H}" role="img" data-i18n-aria="costs.chartAlt" aria-label="Grouped bars comparing cost before and after optimization in four categories."></svg>
+    <ul class="costs__legend">
+      <li><span class="costs__swatch costs__swatch--before" aria-hidden="true"></span><span data-i18n="costs.before">Before</span></li>
+      <li><span class="costs__swatch costs__swatch--after" aria-hidden="true"></span><span data-i18n="costs.after">After</span></li>
+    </ul>
+    <p class="costs__note" data-i18n="costs.note">Illustrative view: bar heights are proportional to each reduction, figures are not shown.</p>
   </div>`;
 
 export default function createCosts() {
   const run = createRunner();
   let root;
   let unsubLang = () => {};
-  let bars = [];
   let els = [];
 
-  function setLabel(el, key, cx) {
-    el.replaceChildren();
-    t(key).split('\n').forEach((line, i) => {
-      const span = svg('tspan', { x: cx, y: BOTTOM + 16 + i * 13 });
-      span.textContent = line;
-      el.appendChild(span);
-    });
-  }
-
   function relabel() {
-    els.forEach((e, i) => setLabel(e.label, bars[i].key, bars[i].cx));
+    els.forEach((e, i) => {
+      e.label.replaceChildren();
+      t(CATEGORIES[i].key).split('\n').forEach((line, row) => {
+        const span = svg('tspan', { x: COL * (i + 0.5), y: BOTTOM + 17 + row * 14 });
+        span.textContent = line;
+        e.label.appendChild(span);
+      });
+    });
   }
 
   function build() {
     const chart = root.querySelector('[data-role="chart"]');
-    bars = layout();
-
     svg('line', { x1: 0, x2: W, y1: BOTTOM + 0.5, y2: BOTTOM + 0.5, class: 'costs__axis-line' }, chart);
 
-    // Connectors first so bars paint over their ends.
-    const connectors = bars.slice(1).map((b, i) => {
-      const prev = bars[i];
-      const y = b.kind === 'final' ? b.top : prev.bottom;
-      return svg('line', {
-        x1: prev.cx + BAR_W / 2, x2: b.cx - BAR_W / 2, y1: y, y2: y, class: 'costs__link',
-      }, chart);
-    });
-
-    els = bars.map((b, i) => {
-      const g = svg('g', { class: `costs__bar costs__bar--${b.kind}` }, chart);
-      const halo = svg('rect', {
-        x: b.cx - BAR_W / 2 - 4, width: BAR_W + 8, rx: 4, class: 'costs__halo',
-        y: b.top - 4, height: b.bottom - b.top + 8,
-      }, g);
-      const rect = svg('rect', { x: b.cx - BAR_W / 2, width: BAR_W, rx: 3, class: 'costs__rect', y: b.top, height: 0 }, g);
+    els = CATEGORIES.map((_, i) => {
+      const cx = COL * (i + 0.5);
+      const g = svg('g', { class: 'costs__group' }, chart);
+      const bx = cx - GAP / 2 - BAR_W;
+      const ax = cx + GAP / 2;
+      const before = svg('rect', { x: bx, width: BAR_W, rx: 3, class: 'costs__rect costs__rect--before', y: BOTTOM, height: 0 }, g);
+      const saved = svg('rect', { x: ax, width: BAR_W, rx: 3, class: 'costs__saved', y: BOTTOM, height: 0 }, g);
+      const after = svg('rect', { x: ax, width: BAR_W, rx: 3, class: 'costs__rect costs__rect--after', y: BOTTOM, height: 0 }, g);
       const label = svg('text', { class: 'costs__label', 'text-anchor': 'middle' }, g);
-      return { g, halo, rect, label, link: connectors[i - 1] ?? null };
+      return { before, saved, after, label };
     });
     relabel();
   }
 
   function setProgress(p) {
     els.forEach((e, i) => {
-      const b = bars[i];
-      const [start, len] = SLOTS[i];
-      const local = clamp((p - start) / len, 0, 1);
-      const grow = easeOutCubic(local);
-      const h = (b.bottom - b.top) * grow;
+      const grow = easeOutCubic(clamp((p - i * GROW_STAGGER) / GROW_LEN, 0, 1));
+      const drop = clamp((p - (DROP_START + i * DROP_STEP)) / DROP_LEN, 0, 1);
+      const beforeH = FULL * grow;
+      const afterH = beforeH * (1 - CATEGORIES[i].reduction * easeInOutCubic(drop));
 
-      // Baseline and result grow up from the axis; steps drop down from the previous level.
-      e.rect.setAttribute('y', b.kind === 'step' ? b.top : b.bottom - h);
-      e.rect.setAttribute('height', h);
-      e.label.style.opacity = clamp((local - 0.3) / 0.4, 0, 1);
-      if (e.link) e.link.style.opacity = clamp(local * 4, 0, 1);
+      e.before.setAttribute('y', BOTTOM - beforeH);
+      e.before.setAttribute('height', beforeH);
+      e.after.setAttribute('y', BOTTOM - afterH);
+      e.after.setAttribute('height', afterH);
 
-      // Pulse on each step so thin reductions stay noticeable.
-      const pulse = b.kind === 'step' && local > 0 && local < 1 ? Math.sin(local * Math.PI) : 0;
-      e.halo.style.opacity = pulse;
+      // The removed part sits above the after bar and fades out as it drops.
+      e.saved.setAttribute('y', BOTTOM - beforeH);
+      e.saved.setAttribute('height', beforeH - afterH);
+      e.saved.style.opacity = drop > 0 ? lerp(0.85, 0.2, easeOutCubic(drop)) : 0;
+
+      e.label.style.opacity = clamp((grow - 0.4) / 0.5, 0, 1);
     });
   }
 

@@ -32,7 +32,8 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 - [x] T4.1 Rework Costs scene (owner request 2026-11-26): generic cost-optimization waterfall with no visible figures. Bars sized from a 16000 baseline: voice agent -5000, EC2 rightsizing -600, EC2 scheduled stop/start -500, log retention -100. Short generic labels, no implementation detail (no Nova Sonic). Route: delegated (writer trigger: costs.js + i18n.js + styles).
 - [x] T4.2 Rework CI/CD scene (owner request 2026-11-26): two versions, "current" at 100%, "new" arrives, current becomes "previous", traffic crossfades (one rises while the other falls). Keep `r` rollback (traffic returns to previous). Route: delegated (same writer as T4.1).
 - [ ] T5 IaC, GenAI agent, AI tooling scenes. Route: delegated.
-- [ ] T6 Polish: reduced motion, mobile layout, README. Route: delegated.
+- [x] T4.3 Replace the costs waterfall with per-category before/after bars (owner request 2026-11-26). Categories and reductions (used only for bar heights, no figures shown): voice agent -80%, query optimization -10%, log retention -60%, EC2 scheduled stop/start (24h to 8h) -65%. Supersedes the T4.1 waterfall; resolves review finding R3-002 (waterfall min-height drift). Route: delegated (writer trigger: costs.js + i18n.js + styles).
+- [ ] T6 Polish: reduced motion, mobile layout, README. Also: review finding (lineage review-66fddcb42b5e2e09) R3-001 pipeline particles stay frozen mid-lane after reset. Route: delegated.
 
 ## Acceptance criteria
 - No console/CSP errors; certifications load from `badges.json`.
@@ -50,6 +51,8 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 - T4.2 commit "feat: rework ci/cd scene as two-version traffic shift". Checks: node --check on all js/ files ok; headless CDP at 1280px and 375px: v1 Current 100%, v2 arrives (v1 relabels Previous, v2 New, 10% then 100% while v1 falls to 0%, then v2 Current), particles split between both lanes, key r injects failure (alarm, traffic back to v1 at 100% and v2 at 0%, v1 Current again, v2 Rolled back), r from the Costs scene switches to CI/CD, EN/ES relabels roles and panel title, no overflow, reduced-motion emulation renders the final state, no console errors; screenshots reviewed.
 
 - Native review (T1–T4 range from 7fd7b48, medium risk, consent granted): approved and acknowledged, lens review-reliability. Non-blocking follow-ups: R3-001 hero says 14 certs vs 17 badges rendered; R3-002 last section (Contact) may never become current in statusline/j at page bottom; R3-003 help dialog lacks focus trap; R3-004 Space/Enter replay overrides native Space scroll everywhere; R3-005 no automated tests for deterministic logic.
+- T4.3 commit "feat: show costs scene as per-category before/after bars". Checks: node --check on all js/ and js/scenes/ files ok; headless CDP at 1280px and 375px: after/before height ratios 0.2/0.9/0.4/0.35 exactly, costs panel textContent has no digits (strict, no exclusions, aria-label also digit-free), no horizontal overflow, Space replays (bars regrow from zero), EN/ES relabels, reduced-motion emulation renders the final state, no console or CSP errors; screenshots reviewed. Labels use 12px SVG text at 320 units wide (about 12px at 375px). Removed waterfall code, FINAL constant, and dead i18n keys (costs.baseline, step1-4, final) and CSS (links, halo, connectors).
+- Native review (T4.1–T4.2 range from 931587f, medium risk, consent granted): approved and acknowledged, lens review-reliability. Non-blocking: R3-001 pipeline particles stay frozen mid-lane after reset (folded into T6); R3-002 waterfall min-height drift (superseded by T4.3).
 
 ## Next step
-Decide follow-ups R3-001..R3-004 (fold into T6), then T5 (IaC, GenAI agent, AI tooling scenes).
+Fold review follow-ups into T6, then T5 (IaC, GenAI agent, AI tooling scenes).

@@ -606,12 +606,15 @@ kbd {
 /* ---- Costs scene ------------------------------------------------------- */
 .costs__svg { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; }
 .costs__axis-line { stroke: var(--border); stroke-width: 1; }
-.costs__link { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
-.costs__rect { fill: var(--ok); }
-.costs__bar--base .costs__rect { fill: var(--accent-text); }
-.costs__bar--final .costs__rect { fill: var(--info); }
-.costs__halo { fill: none; stroke: var(--ok); stroke-width: 2; opacity: 0; }
-.costs__label { fill: var(--muted); font: 600 11px var(--font); opacity: 0; }
+.costs__rect--before { fill: var(--muted); opacity: 0.55; }
+.costs__rect--after { fill: var(--ok); }
+.costs__saved { fill: var(--ok); stroke: var(--ok); stroke-width: 1; stroke-dasharray: 3 3; fill-opacity: 0.15; opacity: 0; }
+.costs__label { fill: var(--muted); font: 600 12px var(--font); opacity: 0; }
+.costs__legend { display: flex; justify-content: center; gap: 20px; list-style: none; margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
+.costs__legend li { display: inline-flex; align-items: center; gap: 8px; }
+.costs__swatch { width: 12px; height: 12px; border-radius: 3px; }
+.costs__swatch--before { background: var(--muted); opacity: 0.55; }
+.costs__swatch--after { background: var(--ok); }
 .costs__note { color: var(--muted); font-size: 0.8rem; margin-top: 10px; }
 
 /* ---- CI/CD scene ------------------------------------------------------- */
