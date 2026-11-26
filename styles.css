@@ -609,7 +609,7 @@ kbd {
 .costs__rect--before { fill: var(--muted); opacity: 0.55; }
 .costs__rect--after { fill: var(--ok); }
 .costs__saved { fill: var(--ok); stroke: var(--ok); stroke-width: 1; stroke-dasharray: 3 3; fill-opacity: 0.15; opacity: 0; }
-.costs__label { fill: var(--muted); font: 600 12px var(--font); opacity: 0; }
+.costs__label { fill: var(--muted); font: 600 13px var(--font); opacity: 0; }
 .costs__legend { display: flex; justify-content: center; gap: 20px; list-style: none; margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
 .costs__legend li { display: inline-flex; align-items: center; gap: 8px; }
 .costs__swatch { width: 12px; height: 12px; border-radius: 3px; }
@@ -634,8 +634,12 @@ kbd {
 .pl__node--running rect { stroke: var(--info); }
 .pl__node--ok rect { stroke: var(--ok); fill: rgba(95, 208, 138, 0.08); }
 .pl__node--fail rect { stroke: var(--err); fill: rgba(240, 104, 111, 0.14); }
-.pl__title { fill: var(--text); font: 600 12.5px var(--font); }
-.pl__sub { fill: var(--muted); font: 500 9.5px var(--mono); }
+.pl__title { fill: var(--text); font: 600 13px var(--font); }
+.pl__sub { fill: var(--muted); font: 500 12px var(--mono); }
+/* Vertical (narrow) layout is scaled down on phones: larger source sizes keep it readable. */
+.pl__svg--v .pl__title { font-size: 14px; }
+.pl__svg--v .pl__sub { font-size: 14px; }
+.pl__svg--v .pl__rb-label { font-size: 14px; }
 
 .pl__icon circle, .pl__icon path { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: none; }
 .pl__node--idle .i-idle { display: block; fill: var(--border); stroke: none; }
@@ -655,7 +659,7 @@ kbd {
 
 .pl__rb-path { stroke: var(--border); stroke-width: 2; stroke-dasharray: 6 6; }
 .pl__rb-arrow { fill: var(--border); }
-.pl__rb-label { fill: var(--muted); font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.pl__rb-label { fill: var(--muted); font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
 .pl__rollback--active .pl__rb-path { stroke: var(--err); stroke-width: 3; animation: dash 0.6s linear infinite; }
 .pl__rollback--active .pl__rb-arrow { fill: var(--err); }
 .pl__rollback--active .pl__rb-label { fill: var(--err); }
@@ -687,7 +691,7 @@ kbd {
 .pl__lane--v1 { stroke: var(--info); }
 .pl__lane--v2 { stroke: var(--ok); }
 .pl__endpoint rect { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.5; }
-.pl__endpoint text { fill: var(--text); font: 700 12px var(--mono); }
+.pl__endpoint text { fill: var(--text); font: 700 14px var(--mono); }
 .pl__endpoint--v1 rect { stroke: var(--info); }
 .pl__endpoint--v2 rect { stroke: var(--ok); }
 .pl__dot { opacity: 0; }
@@ -707,7 +711,7 @@ kbd {
 .pl__bar { height: 12px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
 .pl__bar-fill { height: 100%; width: 100%; background: var(--ok); border-radius: 6px; transform-origin: left; transform: scaleX(0); }
 
-.pl__chip { padding: 2px 10px; border-radius: 999px; font: 700 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.04em; border: 1px solid; transition: color 0.3s, border-color 0.3s, background 0.3s; }
+.pl__chip { padding: 2px 10px; border-radius: 999px; font: 700 0.75rem var(--mono); text-transform: uppercase; letter-spacing: 0.04em; border: 1px solid; transition: color 0.3s, border-color 0.3s, background 0.3s; }
 .pl__chip--ok { color: var(--ok); border-color: rgba(95, 208, 138, 0.45); }
 .pl__chip--alarm { color: var(--err); border-color: var(--err); background: rgba(240, 104, 111, 0.14); }
 
@@ -715,7 +719,7 @@ kbd {
 .pl__spark-line { fill: none; stroke: var(--info); stroke-width: 1.8; stroke-linejoin: round; }
 .pl__spark-area { fill: rgba(124, 196, 238, 0.12); }
 .pl__threshold { stroke: var(--err); stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.8; }
-.pl__spark-label { display: flex; align-items: center; gap: 8px; margin-top: 6px; color: var(--muted); font-size: 0.74rem; }
+.pl__spark-label { display: flex; align-items: center; gap: 8px; margin-top: 6px; color: var(--muted); font-size: 0.78rem; }
 .pl__threshold-key { width: 18px; border-top: 1px dashed var(--err); }
 .pl__note { color: var(--muted); font-size: 0.78rem; margin-top: 12px; }
 
@@ -910,4 +914,134 @@ kbd {
 
 @media (prefers-reduced-motion: reduce) {
   .tool__card, .tool__box, .tool__step, .tool__tick, .tool__piece, .tool__hub, .tool__assistant, .tool__conn, .tool__wire, .tool__msg { transition: none; }
+}
+
+/* ==========================================================================
+   Short viewports (laptops at high OS scaling, small windows).
+   Goal: when the impact section is scrolled to, the tabs and the whole active
+   scene fit between the navbar and the statusline. Two layers:
+   1. up to 860px tall: compact navbar, statusline, section spacing and hero;
+   2. up to 1100px tall: compact impact stage (hidden secondary copy, tabs under
+      the navbar, scene layouts that trade height for width).
+   ========================================================================== */
+@media (min-width: 760px) and (max-height: 860px) {
+  :root {
+    --nav-h: 48px;
+    --status-h: 26px;
+    --pad-y: 36px;
+  }
+
+  .nav__links a { padding: 4px 10px; }
+  .lang-btn { padding: 4px 10px; }
+  .icon-link { width: 32px; height: 32px; }
+
+  /* Hero: tighter, so the stat cards stay in the first screen. */
+  .hero { padding-top: 24px; padding-bottom: 20px; }
+  .hero__name { font-size: clamp(2.2rem, 9vh, 3.6rem); margin: 2px 0 6px; }
+  .hero__summary { margin-top: 10px; }
+  .hero__location { margin-top: 8px; }
+  .hero__cta { margin-top: 14px; }
+  .btn { min-height: 40px; }
+  .stats { margin-top: 16px; }
+  .stat { padding: 8px 14px; }
+  .stat dd { font-size: clamp(1.4rem, 5.5vh, 2rem); line-height: 1.2; }
+  .hero__hint { margin-top: 10px; }
+}
+
+@media (min-width: 760px) and (max-height: 1100px) {
+  :root {
+    --tabs-h: 34px;
+    /* Space the impact heading occupies above the tabs (see #impact). */
+    --impact-pre: 40px;
+    --chrome: calc(var(--nav-h) + var(--status-h));
+  }
+  html { scroll-padding-top: calc(var(--nav-h) + 5px); }
+
+  /* Impact: the heading shrinks and scrolls away; tabs land under the navbar. */
+  #impact { padding-block: 12px 12px; scroll-margin-top: calc(-1 * var(--impact-pre)); }
+  #impact .section__title { font-size: 1.1rem; line-height: 1.2; margin-bottom: 6px; }
+  #impact .section__title::after,
+  #impact .section__lead { display: none; }
+
+  /* Tabs and the replay button share one row. */
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .stage__tabs { grid-column: 1; grid-row: 1; min-width: 0; }
+  .stage__panels { grid-column: 1 / -1; grid-row: 2; }
+  .stage__bar { grid-column: 2; grid-row: 1; align-items: center; padding: 0 10px; border-top: 0; border-bottom: 1px solid var(--border); }
+  .stage__tab { min-height: var(--tabs-h); font-size: 0.85rem; padding: 0 14px; }
+  .btn-small { min-height: 28px; padding: 0 12px; }
+
+  .scene { padding: 8px 16px 10px; min-height: 0; }
+  .scene__head { margin-bottom: 6px; }
+  .scene__head h3 { font-size: 1rem; line-height: 1.3; }
+  .scene__head p { display: none; }
+  .costs__note, .pl__note, .iac__note, .agent__note, .tool__note { display: none; }
+
+  /* Costs: the chart takes the remaining height. */
+  .costs__svg { width: auto; max-width: 100%; height: clamp(170px, calc(100dvh - var(--chrome) - 140px), 360px); }
+  .costs__legend { margin-top: 6px; }
+
+  /* CI/CD: wide diagram on top, the two panels become short side-by-side strips. */
+  .pl__head { flex-wrap: nowrap; align-items: center; }
+  .pl__head > div { min-width: 0; }
+  .pl__diagram { max-width: none; }
+  .pl__svg--h { width: auto; max-width: 100%; height: min(184px, calc(100dvh - var(--chrome) - 276px)); min-height: 150px; margin-inline: auto; }
+  .pl__msg { min-height: 0; margin: 4px 0 6px; padding: 3px 12px; font-size: 0.85rem; line-height: 1.4; }
+  .pl__panels { gap: 8px; }
+  .pl__panel { padding: 8px 12px; }
+  .pl__panel h4 { font-size: 0.85rem; line-height: 1.3; }
+  .pl__panel:first-child {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'title title' 'flow v1' 'flow v2';
+    column-gap: 14px;
+    align-items: center;
+  }
+  .pl__panel:first-child h4 { grid-area: title; margin-bottom: 4px; }
+  .pl__flow { grid-area: flow; width: 270px; max-width: none; margin: 0; }
+  .pl__ver[data-role='ver-v1'] { grid-area: v1; }
+  .pl__ver[data-role='ver-v2'] { grid-area: v2; }
+  .pl__ver { margin-top: 0; gap: 0 10px; }
+  .pl__ver-name { font-size: 0.85rem; }
+  .pl__ver-pct { font-size: 1.05rem; line-height: 1.2; }
+  .pl__bar { height: 8px; margin-top: 2px; }
+  .pl__panel-head { margin-bottom: 4px; flex-wrap: nowrap; }
+  .pl__panel:last-child { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; align-items: end; }
+  .pl__panel:last-child .pl__panel-head { grid-column: 1 / -1; }
+  .pl__spark { width: auto; height: 62px; }
+  .pl__spark-label { margin-top: 0; }
+
+  /* IaC: code, tree and environments side by side. */
+  .iac { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.05fr); gap: 0 14px; align-items: start; }
+  .iac > .scene__head { grid-column: 1 / -1; }
+  .iac__main { display: contents; }
+  .iac__code { grid-column: 1; grid-row: 2; padding: 8px 10px 10px; }
+  .iac__lines { line-height: 1.5; }
+  .iac__tree { grid-column: 2; grid-row: 2 / span 2; }
+  .iac__msg { grid-column: 1; grid-row: 3; margin-top: 8px; min-height: 0; }
+  .iac__envs { grid-column: 3; grid-row: 2 / span 2; grid-template-columns: minmax(0, 1fr); margin-top: 0; gap: 6px; }
+  .iac__root { padding: 4px 12px; }
+  .iac__link { height: 8px; }
+  .iac__stack { padding: 5px 10px 6px; display: flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; }
+  .iac__stack-name { margin-bottom: 0; }
+  .iac__env { padding: 6px 8px; gap: 4px; }
+  .iac__env-stacks { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+
+  /* GenAI agent: tighter diagram. */
+  .agent__diagram { gap: 10px 26px; }
+  .agent__node { padding: 5px 6px; gap: 2px; }
+  .agent__log { min-height: 30px; gap: 4px; }
+  .agent__bubble { padding: 3px 8px; }
+  .agent__msg { margin-top: 8px; min-height: 1.5em; }
+  .agent__beats { margin-top: 6px; }
+
+  /* AI tooling. */
+  .tool__grid { gap: 10px; }
+  .tool__card, .tool__box { padding: 8px 10px; }
+  .tool__task { margin-bottom: 4px; }
+  .tool__steps { margin-bottom: 6px; }
+  .tool__diagram { margin-top: 4px; gap: 14px; }
+  .tool__hub { padding: 8px; gap: 6px; }
+  .tool__assistants { gap: 6px; }
+  .tool__msg { margin-top: 8px; min-height: 1.5em; }
 }

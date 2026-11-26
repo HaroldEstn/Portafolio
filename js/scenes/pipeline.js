@@ -153,11 +153,40 @@ export default function createPipeline() {
     });
   }
 
+  // Long sub-labels wrap onto two lines in the horizontal layout so the text
+  // can stay at a readable size inside the narrow nodes.
+  function setSub(node, text, isV) {
+    node.sub.replaceChildren();
+    let lines = [text];
+    if (!isV && text.length > 15) {
+      const dot = text.indexOf(' \u00b7 ');
+      if (dot > 0) {
+        lines = [text.slice(0, dot), text.slice(dot + 3)];
+      } else {
+        const mid = text.length / 2;
+        let at = -1;
+        for (let k = 0; k < text.length; k += 1) {
+          if (text[k] === ' ' && (at < 0 || Math.abs(k - mid) < Math.abs(at - mid))) at = k;
+        }
+        if (at > 0) lines = [text.slice(0, at), text.slice(at + 1)];
+      }
+    }
+    if (lines.length === 1) {
+      node.sub.textContent = text;
+      return;
+    }
+    lines.forEach((line, i) => {
+      const span = svg('tspan', { x: node.cx, y: node.subY + i * 14 });
+      span.textContent = line;
+      node.sub.appendChild(span);
+    });
+  }
+
   function relabel() {
     const isV = vertical();
     nodes.forEach((node, i) => {
       setTitle(node, STAGES[i].title, isV, node.cx, node.titleY);
-      if (node.sub) node.sub.textContent = t(STAGES[i].sub);
+      if (node.sub) setSub(node, t(STAGES[i].sub), isV);
     });
     rollbackEls.label && (rollbackEls.label.textContent = t('pipeline.rollback'));
     applyRoles();
@@ -168,7 +197,7 @@ export default function createPipeline() {
     diagramEl.replaceChildren();
 
     const W = isV ? 350 : 760;
-    const H = isV ? 452 : 176;
+    const H = isV ? 452 : 166;
     const diagram = svg('svg', {
       class: `pl__svg pl__svg--${isV ? 'v' : 'h'}`,
       viewBox: `0 0 ${W} ${H}`,
@@ -177,7 +206,7 @@ export default function createPipeline() {
     diagram.dataset.i18nAria = 'pipeline.diagramAlt';
 
     const nw = isV ? 270 : 112;
-    const nh = isV ? 56 : 88;
+    const nh = isV ? 56 : 96;
     const rects = STAGES.map((_, i) =>
       isV ? { x: 16, y: 8 + i * (nh + 20) } : { x: 4 + i * 128, y: 16 },
     );
@@ -214,10 +243,10 @@ export default function createPipeline() {
       const ax = c.x + nw / 2;
       const bx = m.x + nw / 2;
       const y0 = m.y + nh;
-      d = `M${bx} ${y0} C${bx} ${y0 + 50} ${ax} ${y0 + 50} ${ax} ${y0 + 2}`;
+      d = `M${bx} ${y0} C${bx} ${y0 + 40} ${ax} ${y0 + 40} ${ax} ${y0 + 2}`;
       arrow = `${ax - 5},${y0 + 10} ${ax + 5},${y0 + 10} ${ax},${y0 + 1}`;
       lx = (ax + bx) / 2;
-      ly = y0 + 52;
+      ly = y0 + 46;
     }
     const rbGroup = svg('g', { class: 'pl__rollback' }, diagram);
     const rbPath = svg('path', { d, fill: 'none', class: 'pl__rb-path' }, rbGroup);
@@ -247,12 +276,11 @@ export default function createPipeline() {
       const title = svg('text', {
         x: cx, y: titleY, class: 'pl__title', 'text-anchor': isV ? 'start' : 'middle',
       }, g);
+      const subY = isV ? r.y + 43 : r.y + 68;
       const sub = stage.sub
-        ? svg('text', {
-            x: cx, y: isV ? r.y + 43 : r.y + 76, class: 'pl__sub', 'text-anchor': isV ? 'start' : 'middle',
-          }, g)
+        ? svg('text', { x: cx, y: subY, class: 'pl__sub', 'text-anchor': isV ? 'start' : 'middle' }, g)
         : null;
-      return { g, title, sub, cx, titleY };
+      return { g, title, sub, cx, titleY, subY };
     });
 
     token = svg('circle', { r: 8, class: 'pl__token', cx: 0, cy: 0 }, diagram);
