@@ -79,14 +79,27 @@ function renderBadges(badges) {
   });
 }
 
+let badgesPromise = null;
+
+/** Fetch badges.json once and share the parsed list between consumers. */
+export function getBadges() {
+  badgesPromise ||= fetch('badges.json')
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then((data) => {
+      const badges = data.data || data;
+      if (!Array.isArray(badges)) throw new Error('Unexpected format');
+      return badges;
+    });
+  return badgesPromise;
+}
+
 export async function loadCertifications() {
   const statusEl = document.getElementById('cert-status');
   try {
-    const res = await fetch('badges.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const badges = data.data || data;
-    if (!Array.isArray(badges)) throw new Error('Unexpected format');
+    const badges = await getBadges();
     statusEl.hidden = true;
     renderBadges(badges);
   } catch (err) {

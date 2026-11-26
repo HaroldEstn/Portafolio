@@ -28,9 +28,9 @@ export const DICTIONARY = {
     'hero.location': 'Zipaquirá, Colombia (near Bogotá)',
     'hero.cta1': 'See the impact',
     'hero.cta2': 'Get in touch',
+    'hero.certsLabel': 'Certifications',
     'hero.hint': 'Tip: press ? for keyboard shortcuts.',
     'stat.years': 'Years on AWS in production',
-    'stat.certs': 'Certifications',
     'stat.stacks': 'Production IaC stacks',
     'stat.images': 'Docker images in production',
 
@@ -268,9 +268,9 @@ export const DICTIONARY = {
     'hero.location': 'Zipaquirá, Colombia (cerca de Bogotá)',
     'hero.cta1': 'Ver el impacto',
     'hero.cta2': 'Contáctame',
+    'hero.certsLabel': 'Certificaciones',
     'hero.hint': 'Tip: presiona ? para ver los atajos de teclado.',
     'stat.years': 'Años en AWS en producción',
-    'stat.certs': 'Certificaciones',
     'stat.stacks': 'Stacks de IaC en producción',
     'stat.images': 'Imágenes Docker en producción',
 
