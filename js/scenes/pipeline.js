@@ -1,7 +1,9 @@
 // CI/CD scene: a token travels Push -> Unit tests -> SonarQube -> Build & push
-// ECR -> Canary deploy -> Monitoring. "Inject failure" (button or key r) makes
-// the error metric spike, the alarm fire, traffic shift back to 0% and the
-// rollback path light up before everything recovers.
+// ECR -> Canary deploy -> Monitoring. Two versions serve traffic: v1 starts as
+// "Current" at 100%; when v2 arrives v1 becomes "Previous" and traffic shifts
+// gradually to v2 (particles split between both). "Inject failure" (button or
+// key r) makes the error metric spike, the alarm fire, traffic shift back to v1
+// and the rollback path light up before everything recovers.
 
 import { applyTranslations, onLangChange, t } from '../i18n.js';
 import { createRunner, svg, lerp, easeInOutCubic, clamp } from '../util.js';
@@ -17,6 +19,25 @@ const STAGES = [
 const CANARY = 4;
 const MONITOR = 5;
 const MESSAGES = ['push', 'test', 'sonar', 'build', 'canary', 'monitor'];
+
+// Traffic flow: two lanes (v1, v2) drawn as cubic curves from the source.
+const LANES = [
+  { y: 16, cls: 'v1' },
+  { y: 68, cls: 'v2' },
+];
+const FLOW_FROM = { x: 30, y: 42 };
+const FLOW_TO_X = 232;
+const POOL = 36;
+const flowPoint = (lane, p) => {
+  const x0 = FLOW_FROM.x;
+  const y0 = FLOW_FROM.y;
+  const mid = 130;
+  const q = 1 - p;
+  return {
+    x: q ** 3 * x0 + 3 * q * q * p * mid + 3 * q * p * p * mid + p ** 3 * FLOW_TO_X,
+    y: q ** 3 * y0 + 3 * q * q * p * y0 + 3 * q * p * p * lane.y + p ** 3 * lane.y,
+  };
+};
 
 const SAMPLES = 48;
 const BASE_ERR = 8;
@@ -38,15 +59,19 @@ const TEMPLATE = `
     <p class="pl__msg" data-role="msg" aria-live="polite" data-i18n="pipeline.msg.idle">Ready.</p>
     <div class="pl__panels">
       <section class="pl__panel">
-        <h4 data-i18n="pipeline.traffic.title">Canary traffic split</h4>
-        <div class="pl__traffic">
-          <span class="pl__traffic-val" data-role="traffic-val">0%</span>
-          <span class="pl__traffic-label" data-i18n="pipeline.traffic.new">New version</span>
+        <h4 data-i18n="pipeline.traffic.title">Traffic by version</h4>
+        <svg class="pl__flow" data-role="flow" viewBox="0 0 300 84" aria-hidden="true"></svg>
+        <div class="pl__ver" data-role="ver-v1">
+          <span class="pl__ver-name">v1</span>
+          <span class="pl__ver-role" data-role="role-v1"></span>
+          <span class="pl__ver-pct" data-role="pct-v1">100%</span>
+          <div class="pl__bar" aria-hidden="true"><div class="pl__bar-fill" data-role="fill-v1"></div></div>
         </div>
-        <div class="pl__bar" aria-hidden="true"><div class="pl__bar-fill" data-role="traffic-fill"></div></div>
-        <div class="pl__bar-legend" aria-hidden="true">
-          <span data-i18n="pipeline.traffic.old">Previous version</span>
-          <span data-i18n="pipeline.traffic.new">New version</span>
+        <div class="pl__ver" data-role="ver-v2">
+          <span class="pl__ver-name">v2</span>
+          <span class="pl__ver-role" data-role="role-v2"></span>
+          <span class="pl__ver-pct" data-role="pct-v2">0%</span>
+          <div class="pl__bar" aria-hidden="true"><div class="pl__bar-fill" data-role="fill-v2"></div></div>
         </div>
       </section>
       <section class="pl__panel">
@@ -72,8 +97,12 @@ export default function createPipeline() {
   let msgEl;
   let alarmEl;
   let failBtn;
-  let trafficVal;
-  let trafficFill;
+  let flowEl;
+  let ver = []; // [{ box, role, pct, fill }] for v1, v2
+  let lanes = [];
+  let boxes = [];
+  let pool = [];
+  let acc = [0, 0];
   let sparkLine;
   let sparkArea;
   let unsubLang = () => {};
@@ -87,7 +116,8 @@ export default function createPipeline() {
     rollback: 'off', // off | active | done
     tokenAt: 0,
     tokenVisible: false,
-    traffic: 0,
+    traffic: 0, // share of traffic on v2 (v1 gets the rest)
+    roles: ['current', 'none'], // v1, v2: none | new | current | previous | failed
     msg: 'idle',
     alarm: false,
   };
@@ -130,6 +160,7 @@ export default function createPipeline() {
       if (node.sub) node.sub.textContent = t(STAGES[i].sub);
     });
     rollbackEls.label && (rollbackEls.label.textContent = t('pipeline.rollback'));
+    applyRoles();
   }
 
   function buildDiagram() {
@@ -243,6 +274,7 @@ export default function createPipeline() {
     token.setAttribute('cy', c.y);
     token.classList.toggle('is-on', model.tokenVisible);
     applyTraffic(model.traffic);
+    applyRoles();
     alarmEl.classList.toggle('pl__chip--alarm', model.alarm);
     alarmEl.classList.toggle('pl__chip--ok', !model.alarm);
     alarmEl.dataset.i18n = model.alarm ? 'pipeline.alarm.fire' : 'pipeline.alarm.ok';
@@ -279,9 +311,29 @@ export default function createPipeline() {
     rollbackEls.group.setAttribute('class', `pl__rollback pl__rollback--${value}`);
   }
 
-  function applyTraffic(v) {
-    trafficVal.textContent = `${Math.round(v)}%`;
-    trafficFill.style.transform = `scaleX(${clamp(v, 0, 100) / 100})`;
+  function applyTraffic(v2) {
+    const shares = [100 - v2, v2];
+    shares.forEach((v, i) => {
+      ver[i].pct.textContent = `${Math.round(v)}%`;
+      ver[i].fill.style.transform = `scaleX(${clamp(v, 0, 100) / 100})`;
+      const f = clamp(v, 0, 100) / 100;
+      lanes[i].style.strokeWidth = 1 + 3 * f;
+      lanes[i].style.opacity = 0.2 + 0.8 * f;
+      boxes[i].style.opacity = 0.35 + 0.65 * f;
+    });
+  }
+
+  function applyRoles() {
+    model.roles.forEach((role, i) => {
+      ver[i].role.dataset.i18n = `pipeline.role.${role}`;
+      ver[i].role.textContent = t(`pipeline.role.${role}`);
+      ver[i].box.dataset.state = role;
+    });
+  }
+
+  function setRoles(v1, v2) {
+    model.roles = [v1, v2];
+    applyRoles();
   }
 
   function setTraffic(v) {
@@ -305,6 +357,56 @@ export default function createPipeline() {
       token.setAttribute('cy', lerp(from.y, to.y, p));
     }, { ease: easeInOutCubic });
     run.after(duration + 20, done);
+  }
+
+  /* ---- Traffic flow ---------------------------------------------------- */
+  function buildFlow() {
+    flowEl.replaceChildren();
+    svg('circle', { cx: FLOW_FROM.x - 8, cy: FLOW_FROM.y, r: 6, class: 'pl__src' }, flowEl);
+    lanes = LANES.map((lane) => {
+      const d = `M${FLOW_FROM.x} ${FLOW_FROM.y} C130 ${FLOW_FROM.y} 130 ${lane.y} ${FLOW_TO_X} ${lane.y}`;
+      return svg('path', { d, fill: 'none', class: `pl__lane pl__lane--${lane.cls}` }, flowEl);
+    });
+    boxes = LANES.map((lane, i) => {
+      const g = svg('g', { class: `pl__endpoint pl__endpoint--${lane.cls}` }, flowEl);
+      svg('rect', { x: FLOW_TO_X, y: lane.y - 14, width: 56, height: 28, rx: 7 }, g);
+      const label = svg('text', { x: FLOW_TO_X + 28, y: lane.y + 4, 'text-anchor': 'middle' }, g);
+      label.textContent = `v${i + 1}`;
+      return g;
+    });
+    pool = Array.from({ length: POOL }, () => ({
+      el: svg('circle', { r: 3, class: 'pl__dot', cx: 0, cy: 0 }, flowEl),
+      lane: 0,
+      p: 1,
+    }));
+    acc = [0, 0];
+  }
+
+  // Particles leave the source in proportion to each version's traffic share.
+  function flowStep() {
+    const shares = [100 - model.traffic, model.traffic].map((v) => v / 100);
+    shares.forEach((share, i) => {
+      acc[i] += 0.5 * share;
+      while (acc[i] >= 1) {
+        acc[i] -= 1;
+        const free = pool.find((d) => d.p >= 1);
+        if (!free) break;
+        free.lane = i;
+        free.p = 0;
+        free.el.setAttribute('class', `pl__dot pl__dot--${LANES[i].cls}`);
+      }
+    });
+    pool.forEach((d) => {
+      if (d.p >= 1) {
+        d.el.style.opacity = 0;
+        return;
+      }
+      d.p = Math.min(1, d.p + 0.04);
+      const pt = flowPoint(LANES[d.lane], d.p);
+      d.el.setAttribute('cx', pt.x);
+      d.el.setAttribute('cy', pt.y);
+      d.el.style.opacity = d.p >= 1 ? 0 : 1;
+    });
   }
 
   /* ---- Sparkline ------------------------------------------------------- */
@@ -336,6 +438,7 @@ export default function createPipeline() {
     phase = 'running';
     model.tokenAt = 0;
     run.every(160, tick);
+    run.every(40, flowStep);
     advance(0);
   }
 
@@ -358,11 +461,16 @@ export default function createPipeline() {
     advance(i + 1);
   }
 
+  // v2 arrives: v1 relabels to Previous, then traffic shifts gradually to v2.
   function canary(done) {
+    setRoles('previous', 'new');
     tweenTraffic(10, 500);
     run.after(1500, () => {
       tweenTraffic(100, 1200);
-      run.after(1300, done);
+      run.after(1300, () => {
+        setRoles('previous', 'current');
+        done();
+      });
     });
   }
 
@@ -379,11 +487,12 @@ export default function createPipeline() {
 
   function failSequence() {
     phase = 'failing';
-    // Start from a healthy canary at 100% (as if a new release just shipped).
+    // Start from a healthy new version at 100% (as if a new release just shipped).
     setRollback('off');
     setAlarm(false);
     setState(CANARY, 'ok');
     setState(MONITOR, 'ok');
+    setRoles('previous', 'current');
     setTraffic(100);
 
     setMsg('spike');
@@ -395,6 +504,7 @@ export default function createPipeline() {
       run.after(600, () => {
         setRollback('active');
         setState(CANARY, 'fail');
+        setRoles('previous', 'failed');
         tweenTraffic(0, 1400);
         run.after(2100, () => {
           errTarget = BASE_ERR;
@@ -404,6 +514,7 @@ export default function createPipeline() {
             setState(CANARY, 'ok');
             setState(MONITOR, 'ok');
             setRollback('done');
+            setRoles('current', 'failed');
             phase = 'live';
           });
         });
@@ -430,6 +541,7 @@ export default function createPipeline() {
     model.tokenAt = 0;
     model.tokenVisible = false;
     model.traffic = 0;
+    model.roles = ['current', 'none'];
     model.msg = 'idle';
     model.alarm = false;
   }
@@ -442,8 +554,13 @@ export default function createPipeline() {
       msgEl = el.querySelector('[data-role="msg"]');
       alarmEl = el.querySelector('[data-role="alarm"]');
       failBtn = el.querySelector('[data-role="fail"]');
-      trafficVal = el.querySelector('[data-role="traffic-val"]');
-      trafficFill = el.querySelector('[data-role="traffic-fill"]');
+      flowEl = el.querySelector('[data-role="flow"]');
+      ver = ['v1', 'v2'].map((v) => ({
+        box: el.querySelector(`[data-role="ver-${v}"]`),
+        role: el.querySelector(`[data-role="role-${v}"]`),
+        pct: el.querySelector(`[data-role="pct-${v}"]`),
+        fill: el.querySelector(`[data-role="fill-${v}"]`),
+      }));
       sparkLine = el.querySelector('[data-role="spark-line"]');
       sparkArea = el.querySelector('[data-role="spark-area"]');
       const th = el.querySelector('[data-role="threshold"]');
@@ -453,6 +570,7 @@ export default function createPipeline() {
       failBtn.addEventListener('click', inject);
 
       baseSamples();
+      buildFlow();
       buildDiagram();
 
       mq = window.matchMedia('(min-width: 760px)');
