@@ -815,9 +815,9 @@ kbd {
 .iac__msg { margin-top: 16px; color: var(--muted); font-size: 0.9rem; min-height: 1.4em; transition: color 0.4s; }
 .iac__msg.is-final { color: var(--text); font-weight: 600; }
 .iac__envs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
-.iac__env { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: inherit; font: inherit; text-align: left; cursor: pointer; opacity: 0; transform: translateY(8px); transition: opacity 0.4s, transform 0.4s, border-color 0.3s, background 0.3s; }
-.iac__env.is-on { opacity: 1; transform: none; }
-.iac__env.is-focus { border-color: var(--accent-light); background: var(--surface-2); }
+.iac__env { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: inherit; font: inherit; text-align: left; cursor: pointer; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity 0.4s, transform 0.4s, border-color 0.3s, background 0.3s, visibility 0s 0.4s; }
+.iac__env.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.iac__env.is-focus, .iac__env.is-selected { border-color: var(--accent-light); background: var(--surface-2); }
 .iac__env-name { font: 700 0.85rem var(--mono); color: var(--accent-text); }
 .iac__env-stacks { display: flex; flex-direction: column; gap: 4px; }
 .iac__env-stack { font: 600 12px var(--font); padding: 2px 6px; border-radius: 5px; border: 1px solid rgba(95, 208, 138, 0.5); background: rgba(95, 208, 138, 0.1); overflow-wrap: anywhere; }

@@ -65,7 +65,7 @@ const TEMPLATE = `
     <div class="iac__envs" data-role="envs">
       ${ENVS.map(
         (name) => `
-      <button type="button" class="iac__env" data-role="env" aria-pressed="false">
+      <button type="button" class="iac__env" data-role="env" aria-pressed="false" inert>
         <span class="iac__env-name">${name}</span>
         <span class="iac__env-stacks">${STACKS.map(
           (s) => `<span class="iac__env-stack" data-i18n="iac.stack.${s.key}"></span>`,
@@ -107,15 +107,27 @@ export default function createIac() {
     });
   }
 
-  function focusEnv(index) {
+  // Automatic highlight pass: purely visual, never touches aria-pressed.
+  function highlightEnv(index) {
+    q.envs.forEach((card, i) => card.classList.toggle('is-focus', i === index));
+  }
+
+  // Real user selection: reserved for aria-pressed. Clicking again clears it.
+  function selectEnv(index) {
     q.envs.forEach((card, i) => {
-      card.classList.toggle('is-focus', i === index);
-      card.setAttribute('aria-pressed', String(i === index));
+      const on = i === index;
+      card.classList.toggle('is-selected', on);
+      card.setAttribute('aria-pressed', String(on));
     });
   }
 
+  function revealEnv(i) {
+    q.envs[i].classList.add('is-on');
+    q.envs[i].inert = false;
+  }
+
   function clearState() {
-    root.querySelectorAll('.is-on, .is-active, .is-done, .is-lit, .is-drawn, .is-focus').forEach((el) => {
+    root.querySelectorAll('.is-on, .is-active, .is-done, .is-lit, .is-drawn, .is-focus, .is-selected').forEach((el) => {
       el.classList.remove('is-on', 'is-active', 'is-done', 'is-lit', 'is-drawn', 'is-focus');
     });
     q.envs.forEach((card) => card.setAttribute('aria-pressed', 'false'));
@@ -153,8 +165,11 @@ export default function createIac() {
       };
       q.envs.forEach((card, i) => {
         card.addEventListener('click', () => {
-          userPicked = true;
-          focusEnv(i);
+          if (card.inert) return;
+          const already = card.classList.contains('is-selected');
+          userPicked = !already;
+          highlightEnv(-1);
+          selectEnv(already ? -1 : i);
         });
       });
       clearState();
@@ -169,12 +184,12 @@ export default function createIac() {
         setMsg('iac.msg.deploy');
       });
       STACKS.forEach((_, i) => run.after(STACK_AT + i * STACK_STEP, () => lightStack(i)));
-      ENVS.forEach((_, i) => run.after(ENV_AT + i * ENV_STEP, () => q.envs[i].classList.add('is-on')));
+      ENVS.forEach((_, i) => run.after(ENV_AT + i * ENV_STEP, () => revealEnv(i)));
       run.after(ENV_AT, () => setMsg('iac.msg.envs'));
       run.after(CAPTION_AT, () => q.msg.classList.add('is-final'));
       // One subtle highlight pass over the environments, unless the user picked one.
-      ENVS.forEach((_, i) => run.after(FOCUS_AT + i * FOCUS_STEP, () => !userPicked && focusEnv(i)));
-      run.after(FOCUS_AT + ENVS.length * FOCUS_STEP, () => !userPicked && focusEnv(-1));
+      ENVS.forEach((_, i) => run.after(FOCUS_AT + i * FOCUS_STEP, () => !userPicked && highlightEnv(i)));
+      run.after(FOCUS_AT + ENVS.length * FOCUS_STEP, () => !userPicked && highlightEnv(-1));
     },
 
     reset() {

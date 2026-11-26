@@ -8,7 +8,8 @@ import { applyTranslations, onLangChange, t } from '../i18n.js';
 import { createRunner, svg } from '../util.js';
 
 // Wires between nodes. `o` is the wire orientation on wide and narrow layouts:
-// 'h' leaves the right side and enters the left side, 'v' bottom to top.
+// 'h' leaves the right side and enters the left side, 'v' connects the facing
+// top/bottom edges (bottom to top, or top to bottom when the target is above).
 const EDGES = {
   ingest: { from: 'excel', to: 'etl', o: ['h', 'h'] },
   load: { from: 'etl', to: 'data', o: ['v', 'v'] },
@@ -123,7 +124,9 @@ export default function createAgent() {
         p = [a.r, ys, b.l, clamp(ys, b.t + 10, b.b - 10)];
       } else {
         const xs = clamp(b.l + b.w / 2, a.l + 10, a.r - 10);
-        p = [xs, a.b, clamp(xs, b.l + 10, b.r - 10), b.t];
+        const xe = clamp(xs, b.l + 10, b.r - 10);
+        // Connect the facing edges: upward when the target sits above the source.
+        p = b.t >= a.t ? [xs, a.b, xe, b.t] : [xs, a.t, xe, b.b];
       }
       [e.x1, e.y1, e.x2, e.y2] = p;
       e.line.setAttribute('x1', p[0]);
@@ -329,11 +332,13 @@ export default function createAgent() {
     return base + plan.length;
   }
 
-  /** Static end state: the three outcomes together. */
+  /** Static end state: the three outcomes together (two answered, one blocked). */
   function showSummary() {
     on('excel', 'etl', 'data', 'chat', 'guard', 'router', 'haiku', 'sonnet', 'tool1', 'tool2', 'memory');
+    // Both answered questions went through guardrails, router, lanes and tools;
+    // the last (off-topic) one was stopped, so Guardrails ends on its blocked state.
     Object.keys(edges).forEach((n) => lit(n));
-    guard('ok');
+    guard('block');
     q.dots.replaceChildren();
     addDot();
     q.log.replaceChildren();

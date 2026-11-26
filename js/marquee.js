@@ -44,9 +44,14 @@ export async function initMarquee() {
   if (!root) return;
   try {
     const badges = await getBadges();
+    const main = buildTrack(badges, { hidden: false });
+    if (!main.children.length) {
+      root.hidden = true;
+      return;
+    }
     const inner = document.createElement('div');
     inner.className = 'marquee__inner';
-    inner.append(buildTrack(badges, { hidden: false }), buildTrack(badges, { hidden: true }));
+    inner.append(main, buildTrack(badges, { hidden: true }));
     root.replaceChildren(inner);
     root.hidden = false;
   } catch (err) {

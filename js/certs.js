@@ -92,6 +92,10 @@ export function getBadges() {
       const badges = data.data || data;
       if (!Array.isArray(badges)) throw new Error('Unexpected format');
       return badges;
+    })
+    .catch((err) => {
+      badgesPromise = null;
+      throw err;
     });
   return badgesPromise;
 }

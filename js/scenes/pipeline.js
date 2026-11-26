@@ -410,6 +410,14 @@ export default function createPipeline() {
     acc = [0, 0];
   }
 
+  function clearFlow() {
+    pool?.forEach((d) => {
+      d.p = 1;
+      d.el.style.opacity = 0;
+    });
+    acc = [0, 0];
+  }
+
   // Particles leave the source in proportion to each version's traffic share.
   function flowStep() {
     const shares = [100 - model.traffic, model.traffic].map((v) => v / 100);
@@ -621,6 +629,7 @@ export default function createPipeline() {
       phase = 'idle';
       pendingFailure = false;
       resetModel();
+      clearFlow();
       baseSamples();
       applyModel();
     },
