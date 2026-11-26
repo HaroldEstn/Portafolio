@@ -45,5 +45,7 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 - T3 commit "feat: add stage controller and animated costs scene". Checks: node --check on all js/ files ok; headless CDP at 1280px and 375px: scene plays on entering viewport (KPI counts to -80%, DB card to -USD 600), no horizontal overflow, h/l/1-5/Space switch and replay scenes, statusline follows scene, EN/ES re-renders labels, no console errors; screenshots reviewed.
 - T4 commit "feat: add animated CI/CD pipeline scene with failure injection and rollback". Checks: node --check on all js/ files ok; headless CDP at 1280px and 375px (vertical layout): token travels all stages, canary 10% to 100%, key r and button inject failure (spike, alarm, traffic to 0%, rollback path red then recovered), r from another scene switches to CI/CD, EN/ES relabels, no overflow, no console errors; reduced-motion emulation renders final states; chromium --dump-dom: 17 cert cards, no CSP errors.
 
+- Native review (T1–T4 range from 7fd7b48, medium risk, consent granted): approved and acknowledged, lens review-reliability. Non-blocking follow-ups: R3-001 hero says 14 certs vs 17 badges rendered; R3-002 last section (Contact) may never become current in statusline/j at page bottom; R3-003 help dialog lacks focus trap; R3-004 Space/Enter replay overrides native Space scroll everywhere; R3-005 no automated tests for deterministic logic.
+
 ## Next step
-T1–T4 (first deliverable).
+Decide follow-ups R3-001..R3-004 (fold into T6), then T5 (IaC, GenAI agent, AI tooling scenes).
