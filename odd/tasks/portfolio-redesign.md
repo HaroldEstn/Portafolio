@@ -36,7 +36,7 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
   - [ ] T5.2 GenAI agent scene.
   - [ ] T5.3 AI tooling scene.
 - [x] T4.3 Replace the costs waterfall with per-category before/after bars (owner request 2026-11-26). Categories and reductions (used only for bar heights, no figures shown): voice agent -80%, query optimization -10%, log retention -60%, EC2 scheduled stop/start (24h to 8h) -65%. Supersedes the T4.1 waterfall; resolves review finding R3-002 (waterfall min-height drift). Route: delegated (writer trigger: costs.js + i18n.js + styles).
-- [ ] T6 Polish: reduced motion, mobile layout, README. Also: review finding (lineage review-66fddcb42b5e2e09) R3-001 pipeline particles stay frozen mid-lane after reset. Route: delegated.
+- [ ] T6 Polish: reduced motion, mobile layout, README. Also: review finding (lineage review-66fddcb42b5e2e09) R3-001 pipeline particles stay frozen mid-lane after reset; IaC env cards focusable/clickable while hidden (inert until revealed); IaC auto highlight toggles aria-pressed (use a non-pressed visual class). Route: delegated.
 
 ## Acceptance criteria
 - No console/CSP errors; certifications load from `badges.json`.
@@ -60,3 +60,4 @@ Strategy: ask-on-risk. Forecast > 400 authored lines (full rewrite), single feat
 
 ## Next step
 Fold review follow-ups into T6, then T5.2 (GenAI agent) and T5.3 (AI tooling).
+- Native review (T4.3–T5.1 range from a9ad4d8, medium risk, consent granted): approved and acknowledged, lens review-reliability. Non-blocking: env cards focusable while hidden; auto highlight toggles aria-pressed (both folded into T6); no unit tests for setTyped/colourize (TDD off, noted).
