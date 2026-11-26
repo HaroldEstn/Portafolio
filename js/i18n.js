@@ -43,7 +43,6 @@ export const DICTIONARY = {
     'scene.iac': 'IaC',
     'scene.agent': 'GenAI agent',
     'scene.tooling': 'AI tooling',
-    'scene.soon': 'This scene is coming soon.',
 
     'exp.title': 'Experience',
     'exp.role': 'Cloud and DevOps Engineer',
@@ -285,7 +284,6 @@ export const DICTIONARY = {
     'scene.iac': 'IaC',
     'scene.agent': 'Agente de IA',
     'scene.tooling': 'Herramientas de IA',
-    'scene.soon': 'Esta escena estará disponible pronto.',
 
     'exp.title': 'Experiencia',
     'exp.role': 'Ingeniero Cloud y DevOps',
