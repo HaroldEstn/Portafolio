@@ -7,17 +7,17 @@ import { createRunner, clamp } from '../util.js';
 
 const CODE = [
   "const vpc = new Vpc(this, 'Net');",
+  "new DatabaseInstance(this, 'Db');",
   "new ApplicationLoadBalancer(this, 'Lb');",
   "new FargateService(this, 'Api');",
-  "new DatabaseInstance(this, 'Db');",
   "new Alarm(this, 'Errors');",
 ];
 
 // Dependency order: each stack lights only after the previous one is done.
 const STACKS = [
   { key: 'network', resources: ['vpc', 'subnets'] },
-  { key: 'compute', resources: ['ecs', 'lambda', 'lb'] },
   { key: 'data', resources: ['rds', 'dynamo', 'buckets'] },
+  { key: 'compute', resources: ['ecs', 'lambda', 'lb'] },
   { key: 'monitoring', resources: ['alarms'] },
 ];
 const ENVS = ['dev', 'staging', 'prod'];
@@ -41,7 +41,7 @@ const TEMPLATE = `
       <p data-i18n="iac.sub">A few lines of CDK become a nested stack tree, deployed in dependency order and repeated across environments.</p>
     </header>
     <div class="iac__main">
-      <div class="iac__code" role="img" data-i18n-aria="iac.codeAlt" aria-label="AWS CDK code that defines a network, a load balancer, a container service, a database and an alarm.">
+      <div class="iac__code" role="img" data-i18n-aria="iac.codeAlt" aria-label="AWS CDK code that defines a network, a database, a load balancer, a container service and an alarm.">
         <span class="iac__file" aria-hidden="true">app-stack.ts</span>
         <div class="iac__lines" aria-hidden="true">${CODE.map(
           (line) => `<div class="iac__line"><span class="iac__ghost">${line}</span><span class="iac__typed" data-role="typed"></span></div>`,
