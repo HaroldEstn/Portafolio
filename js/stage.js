@@ -9,10 +9,12 @@
 
 import createCosts from './scenes/costs.js';
 import createPipeline from './scenes/pipeline.js';
+import createIac from './scenes/iac.js';
 
 const FACTORIES = {
   costs: createCosts,
   cicd: createPipeline,
+  iac: createIac,
 };
 
 // Which scene handles which keyboard action.
