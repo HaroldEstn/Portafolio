@@ -282,8 +282,8 @@ main { padding-top: calc(var(--nav-h) + 38px); }
 
 /* ---- Hero certifications marquee -------------------------------------- */
 .marquee {
-  --marquee-h: 64px;
-  --marquee-gap: 20px;
+  --marquee-h: clamp(56px, 5.5vw, 112px);
+  --marquee-gap: clamp(16px, 1.6vw, 32px);
   margin-top: 24px;
   overflow: hidden;
   max-width: 100%;
@@ -993,12 +993,18 @@ kbd {
   .hero__summary { margin-top: 10px; }
   .hero__location { margin-top: 8px; }
   .hero__cta { margin-top: 14px; }
-  .marquee { --marquee-h: 40px; --marquee-gap: 14px; margin-top: 12px; }
+  .marquee { --marquee-h: clamp(48px, 7vh, 64px); --marquee-gap: 14px; margin-top: 12px; }
   .btn { min-height: 40px; }
   .stats { margin-top: 16px; }
   .stat { padding: 8px 14px; }
   .stat dd { font-size: clamp(1.4rem, 5.5vh, 2rem); line-height: 1.2; }
   .hero__hint { margin-top: 10px; }
+}
+
+/* Very short desktop screens: the summary repeats the title and the stat
+   cards, so drop it to keep the stat cards fully in the first screen. */
+@media (min-width: 760px) and (max-height: 640px) {
+  .hero__summary { display: none; }
 }
 
 @media (min-width: 760px) and (max-height: 1100px) {
