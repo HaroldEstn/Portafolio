@@ -128,7 +128,7 @@ export default function createIac() {
 
   function clearState() {
     root.querySelectorAll('.is-on, .is-active, .is-done, .is-lit, .is-drawn, .is-focus, .is-selected').forEach((el) => {
-      el.classList.remove('is-on', 'is-active', 'is-done', 'is-lit', 'is-drawn', 'is-focus');
+      el.classList.remove('is-on', 'is-active', 'is-done', 'is-lit', 'is-drawn', 'is-focus', 'is-selected');
     });
     q.envs.forEach((card) => card.setAttribute('aria-pressed', 'false'));
     q.tree.classList.remove('is-live');
